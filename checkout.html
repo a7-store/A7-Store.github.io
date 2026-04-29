@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - A7 Store</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .checkout-container {
+            max-width: 500px;
+            margin: auto;
+            background: #111;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #333;
+        }
+
+        h2,
+        h3 {
+            color: #fff;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            background: #222;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        .payment-option {
+            display: flex;
+            align-items: center;
+            background: #222;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #444;
+            cursor: pointer;
+        }
+
+        .payment-option input {
+            width: auto;
+            margin-left: 10px;
+        }
+
+        .order-summary {
+            background: #000;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px dashed #444;
+        }
+
+        .summary-item {
+            margin: 10px 0;
+            font-size: 0.95rem;
+            color: #ccc;
+        }
+
+        .summary-total {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #333;
+            font-size: 1.1rem;
+            color: #fff;
+        }
+
+        .complete-btn {
+            width: 100%;
+            padding: 15px;
+            background: white;
+            color: black;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            margin-top: 15px;
+            transition: 0.3s;
+        }
+
+        .complete-btn:hover {
+            background: #eee;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="checkout-container">
+        <h2>الدفع والشحن</h2>
+        <div class="section">
+            <h3>بيانات الشحن</h3>
+            <div class="input-group"><input type="text" id="custName" placeholder="الاسم بالكامل"></div>
+            <div class="input-group"><input type="text" id="custPhone" placeholder="رقم الموبايل"></div>
+            <div class="input-group"><input type="text" id="custAddress" placeholder="العنوان بالتفصيل"></div>
+        </div>
+        <div class="section">
+            <h3>طريقة الدفع</h3>
+            <label class="payment-option">
+                <input type="radio" name="payment" value="Vodafone Cash" checked>
+                <span>فودافون كاش (Vodafone Cash)</span>
+            </label>
+            <label class="payment-option">
+                <input type="radio" name="payment" value="Cash on Delivery">
+                <span>دفع عند الاستلام (COD)</span>
+            </label>
+        </div>
+        <div class="order-summary">
+            <h3>ملخص الطلب</h3>
+            <p id="displayItem" class="summary-item"><strong>المنتج:</strong> </p>
+            <p id="displayColor" class="summary-item"><strong>اللون:</strong> </p>
+            <p id="displaySize" class="summary-item"><strong>المقاس:</strong> </p>
+            <p id="displayQty" class="summary-item"><strong>الكمية:</strong> </p>
+            <p id="displayPrice" class="summary-total"><strong>الإجمالي:</strong> </p>
+        </div>
+        <button class="complete-btn" onclick="finishOrder()">إتمام الطلب عبر واتساب <img src="https://img.icons8.com/color/48/whatsapp--v1.png" alt="WhatsApp" style="width:24px; height:24px; vertical-align:middle; margin-right:8px;"></button>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const itemName = params.get('item') || "";
+        const itemColor = params.get('color') || "N/A";
+        const itemSize = params.get('size') || "";
+        const itemQty = parseInt(params.get('qty')) || 1;
+        const rawPrice = params.get('price') || "0";
+
+        // Extract numeric part from price string like "LE450.00EGP"
+        let unitPrice = parseFloat(rawPrice.replace(/[^0-9.]/g, '')) || 0;
+        let totalPrice = unitPrice * itemQty;
+
+        // Determine if it's EGP or USD (just for aesthetic formatting)
+        let formattedTotal = rawPrice.includes('LE') ? `LE${totalPrice.toFixed(2)}EGP` : `$${totalPrice.toFixed(2)}`;
+
+        document.getElementById('displayItem').innerHTML += " " + itemName;
+        document.getElementById('displayColor').innerHTML += " " + itemColor;
+        document.getElementById('displaySize').innerHTML += " " + itemSize;
+        document.getElementById('displayQty').innerHTML += " " + itemQty;
+        document.getElementById('displayPrice').innerHTML += " " + formattedTotal;
+
+        function finishOrder() {
+            const name = document.getElementById('custName').value.trim();
+            const phone = document.getElementById('custPhone').value.trim();
+            const addr = document.getElementById('custAddress').value.trim();
+            const payMethod = document.querySelector('input[name="payment"]:checked').value;
+            
+            if (!name || !phone || !addr) { 
+                alert("برجاء إكمال جميع البيانات المطلوبة!"); 
+                return; 
+            }
+
+            const msg = `طلب جديد من A7%0A---%0Aالمنتج: ${itemName}%0Aاللون: ${itemColor}%0Aالمقاس: ${itemSize}%0Aالكمية: ${itemQty}%0Aسعر القطعة: ${rawPrice}%0Aالإجمالي: ${formattedTotal}%0A---%0Aالاسم: ${name}%0Aالموبايل: ${phone}%0Aالعنوان: ${addr}%0Aالدفع: ${payMethod}`;
+            window.open(`https://wa.me/201032008808?text=${msg}`, '_blank');
+        }
+    </script>
+</body>
+
+</html>

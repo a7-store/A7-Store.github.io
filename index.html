@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A7 - Minimalist Streetwear</title>
+  <meta name="description" content="A7 is a modern streetwear brand delivering bold youth fashion and everyday style.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Inter:wght@300;400;600;700;800&family=Outfit:wght@400;700;900&display=swap"
+    rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+
+  <!-- Navigation -->
+  <nav>
+    <a href="#home" class="brand-logo">A7 STORE</a>
+    <ul class="nav-links">
+      <li><a href="#home" data-i18n="nav_home">Home</a></li>
+      <li><a href="#collection" data-i18n="nav_collection">Collection</a></li>
+      <li><a href="#contact" data-i18n="nav_contact">Contact</a></li>
+    </ul>
+    <div class="nav-right">
+      <button id="lang-switch" onclick="toggleLanguage()" class="lang-btn-simple">English</button>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section id="home" class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1 class="hero-title" data-i18n="hero_title_main">Define Your Street Style</h1>
+      <p class="hero-subtitle" data-i18n="hero_desc">A7 هي علامة تجارية عصرية لملابس الشارع تقدم أزياء شبابية جريئة
+        وأسلوب حياة يومي.</p>
+      <div class="hero-btns">
+        <a href="#collection" class="btn" data-i18n="hero_explore">Explore Collection</a>
+        <a href="#contact" class="btn btn-outline" data-i18n="hero_contact">Contact Us</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Brand Identity Section (Subtle Profile) -->
+  <div class="brand-profile">
+    <div class="profile-compact">
+      <img src="img/brand.jpg" alt="A7 Store Logo" class="profile-img-small">
+      <div class="profile-text">
+        <h2 class="profile-name">A7 STORE <i data-lucide="check-circle" class="verified-icon"></i></h2>
+        <div class="profile-meta">
+          <span><i data-lucide="map-pin"></i> بردين الزقازيق الشرقية</span>
+          <span><i data-lucide="shopping-bag"></i> Shopping & Retail</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="features-container">
+      <div class="feature-card">
+        <i data-lucide="shield-check"></i>
+        <h3 data-i18n="feat_quality">Premium Quality</h3>
+        <p data-i18n="feat_quality_desc">خامات قطنية 100% عالية الجودة.</p>
+      </div>
+      <div class="feature-card">
+        <i data-lucide="truck"></i>
+        <h3 data-i18n="feat_shipping">Fast Delivery</h3>
+        <p data-i18n="feat_shipping_desc">توصيل سريع لجميع المحافظات.</p>
+      </div>
+      <div class="feature-card">
+        <i data-lucide="refresh-cw"></i>
+        <h3 data-i18n="feat_exchange">Easy Exchange</h3>
+        <p data-i18n="feat_exchange_desc">سياسة استبدال مرنة وسهلة.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Search and Categories -->
+  <section class="catalog-controls">
+    <div class="search-container">
+      <i data-lucide="search"></i>
+      <input type="text" id="productSearch" placeholder="ابحث عن منتج..." onkeyup="searchProducts()">
+    </div>
+
+    <div class="category-bar">
+      <button class="cat-btn active" onclick="filterCategory('all')" data-i18n="cat_all">الكل</button>
+      <button class="cat-btn" onclick="filterCategory('hoodies')" data-i18n="cat_hoodies">هوديز</button>
+      <button class="cat-btn" onclick="filterCategory('tshirts')" data-i18n="cat_tshirts">تيشيرتات</button>
+      <button class="cat-btn" onclick="filterCategory('pants')" data-i18n="cat_pants">بناطيل</button>
+      <button class="cat-btn" onclick="filterCategory('accessories')" data-i18n="cat_acc">إكسسوارات</button>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+
+  <!-- Collection Section -->
+  <section id="collection" class="collection">
+    <h2 data-i18n="collection_title">Latest Collection</h2>
+    <div class="collection-grid">
+      <!-- Product 1 -->
+      <div class="product-card" data-category="hoodies">
+        <div class="discount-badge">-10%</div>
+        <div class="product-img-wrapper">
+          <img src="img/product1.jpg" alt="Oversized Heavy Hoodie" class="product-img">
+        </div>
+        <div class="product-info">
+          <h3 class="product-name" data-i18n="p1_name">Oversized Heavy Hoodie</h3>
+          <p class="product-desc" data-i18n="p1_desc">Premium cotton blend, relaxed fit.</p>
+          <div class="product-price"><span class="old-price">LE350.00</span> LE315.00EGP</div>
+          <div class="offer-countdown" id="countdown-p1">
+            <div class="time-unit">
+              <span class="time-val" id="cd-days">07</span>
+              <span class="time-lbl" data-i18n="lbl_days">أيام</span>
+            </div>
+            <div class="time-unit">
+              <span class="time-val" id="cd-hours">00</span>
+              <span class="time-lbl" data-i18n="lbl_hours">ساعة</span>
+            </div>
+            <div class="time-unit">
+              <span class="time-val" id="cd-mins">00</span>
+              <span class="time-lbl" data-i18n="lbl_mins">دقيقة</span>
+            </div>
+            <div class="time-unit">
+              <span class="time-val" id="cd-secs">00</span>
+              <span class="time-lbl" data-i18n="lbl_secs">ثانية</span>
+            </div>
+          </div>
+          <div class="product-action">
+            <button type="button" class="btn" data-i18n="view_buy"
+              onclick="openModal('Oversized Heavy Hoodie', 'LE315.00EGP', ['M', 'L', 'XL', '2XL'], ['img/product1.jpg', 'img/imgproduct1_back.png.png', 'https://placehold.co/600x800/222222/555555?text=Side+Angle'], ['black', 'charcoal'])">View
+              / Buy</button>
+          </div>
+        </div>
+      </div>
+      <!-- Product 2 -->
+      <div class="product-card" data-category="tshirts">
+        <div class="discount-badge">-15%</div>
+        <div class="product-img-wrapper">
+          <img src="img/product2.jpg" alt="A7 Urban Essential" class="product-img">
+        </div>
+        <div class="product-info">
+          <h3 class="product-name" data-i18n="p2_name">A7 Urban Essential</h3>
+          <p class="product-desc" data-i18n="p2_desc">A7 Your Daily Essential.</p>
+          <div class="product-price"><span class="old-price">LE350.00</span> LE297.50EGP</div>
+          <div class="product-action">
+            <button type="button" class="btn" data-i18n="view_buy"
+              onclick="openModal('A7 Urban Essential', 'LE297.50EGP', ['M', 'L', 'XL', '2XL'], ['img/product2.jpg', 'https://placehold.co/600x800/222222/555555?text=Angle+1', 'https://placehold.co/600x800/333333/555555?text=Angle+2'], ['black', 'white'])">View
+              / Buy</button>
+          </div>
+        </div>
+      </div>
+      <!-- Product 3 -->
+      <div class="product-card" data-category="tshirts">
+        <div class="product-img-wrapper">
+          <img src="img/product3.jpg" alt="Essential Logo Tee" class="product-img">
+        </div>
+        <div class="product-info">
+          <h3 class="product-name" data-i18n="p3_name">Essential Logo Tee</h3>
+          <p class="product-desc" data-i18n="p3_desc">Lightweight shirt, subtle print.</p>
+          <div class="product-price">LE800.00EGP</div>
+          <div class="product-action">
+            <button type="button" class="btn" data-i18n="view_buy"
+              onclick="openModal('Essential Logo Tee', 'LE800.00EGP', ['M', 'L', 'XL', '2XL'], ['img/product3.jpg', 'img/product3_main.jpg', 'img/product3_detail.jpg'], ['white', 'black', 'grey'])">View
+              / Buy</button>
+          </div>
+        </div>
+      </div>
+      <!-- Product 4 -->
+      <div class="product-card" data-category="hoodies">
+        <div class="product-img-wrapper">
+          <img src="https://placehold.co/600x800/1a1a1a/555555?text=Product+4" alt="Product" class="product-img">
+        </div>
+        <div class="product-info">
+          <h3 class="product-name" data-i18n="p4_name">Technical Anorak</h3>
+          <p class="product-desc" data-i18n="p4_desc">Weather resistant, half-zip design.</p>
+          <div class="product-price">LE120.00EGP</div>
+          <div class="product-action">
+            <button type="button" class="btn" data-i18n="view_buy"
+              onclick="openModal('Technical Anorak', 'LE120.00EGP', ['M', 'L', 'XL', '2XL'], ['https://placehold.co/600x800/000000/ffffff?text=Standard', 'https://placehold.co/600x800/222222/ffffff?text=Detail', 'https://placehold.co/600x800/444444/ffffff?text=Texture'], ['black', 'navy'])">View
+              / Buy</button>
+          </div>
+        </div>
+      </div>
+      <!-- Product 5 -->
+      <div class="product-card" data-category="pants">
+        <div class="product-img-wrapper">
+          <img src="https://placehold.co/600x800/1a1a1a/555555?text=Product+5" alt="Product" class="product-img">
+        </div>
+        <div class="product-info">
+          <h3 class="product-name" data-i18n="p5_name">Distressed Denim</h3>
+          <p class="product-desc" data-i18n="p5_desc">Straight leg, vintage wash.</p>
+          <div class="product-price">LE110.00EGP</div>
+          <div class="product-action">
+            <button type="button" class="btn" data-i18n="view_buy"
+              onclick="openModal('Distressed Denim', 'LE110.00EGP', ['30', '32', '34', '36'], ['https://placehold.co/600x800/222222/ffffff?text=Denim+1', 'https://placehold.co/600x800/333333/ffffff?text=Denim+2', 'https://placehold.co/600x800/444444/ffffff?text=Denim+3'], ['blue', 'black'])">View
+              / Buy</button>
+          </div>
+        </div>
+      </div>
+      <!-- Product 6 -->
+      <div class="product-card" data-category="accessories">
+        <div class="product-img-wrapper">
+          <img src="https://placehold.co/600x800/1a1a1a/555555?text=Product+6" alt="Product" class="product-img">
+        </div>
+        <div class="product-info">
+          <h3 class="product-name" data-i18n="p6_name">Signature Beanie</h3>
+          <p class="product-desc" data-i18n="p6_desc">Ribbed knit, fold-over cuff.</p>
+          <div class="product-price">LE150.00EGP</div>
+          <div class="product-action">
+            <button type="button" class="btn" data-i18n="view_buy"
+              onclick="openModal('Signature Beanie', 'LE150.00EGP', ['One Size'], ['https://placehold.co/600x800/1a1a1a/555555?text=Beanie+1', 'https://placehold.co/600x800/1a1a1a/777777?text=Beanie+2', 'https://placehold.co/600x800/1a1a1a/999999?text=Beanie+3'], ['black', 'grey'])">View
+              / Buy</button>
+          </div>
+        </div>
+      </div>
+      <!-- Product 7 -->
+      <div class="product-card" data-category="accessories">
+        <div class="product-img-wrapper">
+          <img src="https://placehold.co/600x800/1a1a1a/555555?text=Product+7" alt="Product" class="product-img">
+        </div>
+        <div class="product-info">
+          <h3 class="product-name" data-i18n="p7_name">Urban Crossbody Bag</h3>
+          <p class="product-desc" data-i18n="p7_desc">Nylon shell, adjustable strap.</p>
+          <div class="product-price">LE350.00EGP</div>
+          <div class="product-action">
+            <button type="button" class="btn" data-i18n="view_buy"
+              onclick="openModal('Urban Crossbody Bag', 'LE350.00EGP', ['Adjustable'], ['https://placehold.co/600x800/1a1a1a/555555?text=Bag+1', 'https://placehold.co/600x800/1a1a1a/777777?text=Bag+2', 'https://placehold.co/600x800/1a1a1a/999999?text=Bag+3'], ['black', 'khaki'])">View
+              / Buy</button>
+          </div>
+        </div>
+      </div>
+      <!-- Product 8 -->
+      <div class="product-card" data-category="hoodies">
+        <div class="product-img-wrapper">
+          <img src="https://placehold.co/600x800/1a1a1a/555555?text=Product+8" alt="Product" class="product-img">
+        </div>
+        <div class="product-info">
+          <h3 class="product-name" data-i18n="p8_name">Mock Neck Sweater</h3>
+          <p class="product-desc" data-i18n="p8_desc">Textured knit, dropped shoulders.</p>
+          <div class="product-price">LE550.00EGP</div>
+          <div class="product-action">
+            <button type="button" class="btn" data-i18n="view_buy"
+              onclick="openModal('Mock Neck Sweater', 'LE550.00EGP', ['M', 'L', 'XL', '2XL'], ['https://placehold.co/600x800/1a1a1a/555555?text=Sweater+1', 'https://placehold.co/600x800/1a1a1a/777777?text=Sweater+2', 'https://placehold.co/600x800/1a1a1a/999999?text=Sweater+3'], ['beige', 'black'])">View
+              / Buy</button>
+          </div>
+        </div>
+      </div>
+      <!-- Product 9 -->
+      <div class="product-card" data-category="pants">
+        <div class="product-img-wrapper">
+          <img src="img/cargo_front.png.png" alt="Heritage Cargo Pants" class="product-img">
+        </div>
+        <div class="product-info">
+          <h3 class="product-name" data-i18n="p9_name">Heritage Cargo Pants</h3>
+          <p class="product-desc" data-i18n="p9_desc">Multi-pocket utility, relaxed fit.</p>
+          <div class="product-price">LE650.00EGP</div>
+          <div class="product-action">
+            <button type="button" class="btn" data-i18n="view_buy"
+              onclick="openModal('Heritage Cargo Pants', 'LE650.00EGP', ['30', '32', '34', '36'], ['img/cargo_front.png.png', 'img/cargo_side.png.png', 'img/cargo_back.png.png'], ['black', 'olive', 'gray'])">View
+              / Buy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+
+
+  <!-- Contact/Booking Section -->
+  <section id="contact" class="contact">
+    <h2 data-i18n="contact_title">Get in Touch</h2>
+    <p data-i18n="contact_subtitle" style="margin-bottom: 2rem; color: var(--gray-color);">Reach out for inquiries.</p>
+
+    <div class="contact-direct">
+      <a href="https://wa.me/201063267221" target="_blank" class="contact-link wa">
+        <img src="https://img.icons8.com/color/48/whatsapp--v1.png" alt="WhatsApp"
+          style="width:24px; height:24px; margin-right:8px;">
+        <span data-i18n="contact_whatsapp">Contact on WhatsApp</span>
+      </a>
+      <a href="https://ig.me/m/ahmed_t_eldashy" target="_blank" class="contact-link ig">
+        <img src="https://img.icons8.com/color/48/instagram-new--v1.png" alt="Instagram"
+          style="width:24px; height:24px; margin-right:8px;">
+        <span data-i18n="contact_instagram">Contact on Instagram</span>
+      </a>
+      <a href="https://m.me/medo.elmarakby.2025" target="_blank" class="contact-link fb">
+        <img src="https://img.icons8.com/color/48/facebook-new.png" alt="Facebook"
+          style="width:24px; height:24px; margin-right:8px;">
+        <span data-i18n="contact_facebook">Contact on Facebook</span>
+      </a>
+      <a href="https://www.tiktok.com/@hos4561?_r=1&_t=ZS-95L60zJAX5E" target="_blank" class="contact-link tt">
+        <img src="https://img.icons8.com/color/48/tiktok.png" alt="TikTok"
+          style="width:24px; height:24px; margin-right:8px;">
+        <span data-i18n="contact_tiktok">Contact on TikTok</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <h3 data-i18n="footer_brand">A7</h3>
+        <p data-i18n="footer_desc">A7 Modern Streetwear & Youth Fashion.</p>
+      </div>
+      <div class="footer-links">
+        <h4 data-i18n="footer_quick_links">Quick Links</h4>
+        <ul>
+          <li><a href="#home" data-i18n="nav_home">Home</a></li>
+          <li><a href="#collection" data-i18n="nav_collection">Collection</a></li>
+          <li><a href="#contact" data-i18n="nav_contact">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-social">
+        <h4 data-i18n="footer_follow">Follow Us</h4>
+        <div class="socials">
+          <a href="https://ig.me/m/ahmed_t_eldashy" target="_blank" class="ig"><i data-lucide="instagram"></i></a>
+          <a href="https://m.me/medo.elmarakby.2025" target="_blank" class="fb"><i data-lucide="facebook"></i></a>
+          <a href="https://www.tiktok.com/@hos4561?_r=1&_t=ZS-95L60zJAX5E" target="_blank" class="tt"><i
+              data-lucide="tiktok"></i></a>
+          <a href="https://wa.me/201063267221" target="_blank" class="wa"><i data-lucide="message-circle"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p data-i18n="footer_copy">&copy; 2026 A7 Streetwear. All rights reserved.</p>
+      <a href="#home" class="back-to-top"><i data-lucide="arrow-up"></i> <span data-i18n="back_to_top">Back to
+          Top</span></a>
+    </div>
+  </footer>
+
+  <!-- Product Modal -->
+  <div id="productModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal()">&times;</span>
+
+      <div class="modal-grid">
+        <div class="modal-gallery">
+          <img id="modalMainImg" src="" alt="Main Product View">
+          <div id="thumbGallery" class="thumb-gallery"></div>
+        </div>
+
+        <div class="modal-info">
+          <h2 id="modalTitle"></h2>
+          <p id="modalPrice" class="price"></p>
+
+          <div class="selection-section">
+            <p class="section-label" data-i18n="modal_color">Select Color:</p>
+            <div id="colorOptions" class="color-options"></div>
+          </div>
+
+          <div class="selection-control">
+            <p class="section-label" data-i18n="modal_size">Select Size:</p>
+            <div id="sizeOptions" class="size-icons"></div>
+          </div>
+
+          <div class="selection-control">
+            <p class="section-label" data-i18n="modal_qty">Quantity:</p>
+            <div class="qty-selector">
+              <button onclick="changeQty(-1)"><i data-lucide="minus"></i></button>
+              <input type="number" id="modalQty" value="1" min="1" readonly>
+              <button onclick="changeQty(1)"><i data-lucide="plus"></i></button>
+            </div>
+          </div>
+
+
+
+          <button class="btn buy-now-btn" onclick="sendOrder()" data-i18n="modal_confirm">Confirm Purchase</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 10000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      overflow-y: auto;
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+      background: #0a0a0a;
+      color: white;
+      margin: 5% auto;
+      padding: 40px;
+      width: 90%;
+      max-width: 900px;
+      border: 1px solid #222;
+      border-radius: 15px;
+      position: relative;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+
+    @media (max-width: 768px) {
+      .modal-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .modal-content {
+        margin: 20px auto;
+        padding: 20px;
+      }
+    }
+
+    .close-btn {
+      position: absolute;
+      right: 25px;
+      top: 15px;
+      font-size: 32px;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: 0.3s;
+    }
+
+    .close-btn:hover {
+      opacity: 1;
+      transform: rotate(90deg);
+    }
+
+    #modalMainImg {
+      width: 100%;
+      aspect-ratio: 3/4;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 1px solid #333;
+    }
+
+    .thumb-gallery {
+      display: flex;
+      gap: 12px;
+      margin-top: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .thumb-img {
+      width: 70px;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: 0.3s;
+      opacity: 0.6;
+    }
+
+    .thumb-img:hover,
+    .thumb-img.active {
+      border-color: white;
+      opacity: 1;
+    }
+
+    .modal-info {
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #modalTitle {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+      letter-spacing: -0.5px;
+    }
+
+    .price {
+      font-size: 1.5rem;
+      color: #888;
+      margin-bottom: 30px;
+      font-weight: 600;
+    }
+
+    .section-label {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #666;
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    .selection-section,
+    .selection-control {
+      margin-bottom: 30px;
+    }
+
+    .color-options {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .color-circle {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+
+    .color-circle:hover {
+      transform: scale(1.15);
+    }
+
+    .color-circle.active {
+      border-color: white;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+    }
+
+    .size-icons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .size-btn {
+      min-width: 50px;
+      height: 50px;
+      border: 1px solid #333;
+      background: #111;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+      font-weight: 600;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .size-btn:hover {
+      border-color: #666;
+    }
+
+    .size-btn.active {
+      background: white;
+      color: black;
+      border-color: white;
+    }
+
+    .buy-now-btn {
+      width: 100%;
+      padding: 18px;
+      background: white;
+      color: black;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.4s;
+      margin-top: 10px;
+    }
+
+    .buy-now-btn:hover {
+      transform: translateY(-3px);
+      background: #f0f0f0;
+      box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
+    }
+  </style>
+
+  <script src="js/script.js"></script>
+</body>
+
+</html>
