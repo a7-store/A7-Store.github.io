@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>A7 - Minimalist Streetwear</title>
-  <meta name="description" content="A7 is a modern streetwear brand delivering bold youth fashion and everyday style.">
+  <title>A7 Beauty - Premium Accessories</title>
+  <meta name="description" content="A7 Beauty offers premium cosmetics, skin care accessories, and elegant beauty tools.">
   <link rel="stylesheet" href="css/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,13 +13,25 @@
     href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Inter:wght@300;400;600;700;800&family=Outfit:wght@400;700;900&display=swap"
     rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 
 <body>
+  
+  <!-- Background Animation -->
+  <div class="bg-animation">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="sparkles" id="sparkles-container"></div>
+  </div>
 
   <!-- Navigation -->
   <nav>
-    <a href="#home" class="brand-logo">A7 STORE</a>
+    <a href="#home" class="brand-logo">A7 BEAUTY</a>
     <ul class="nav-links">
       <li><a href="#home" data-i18n="nav_home">Home</a></li>
       <li><a href="#collection" data-i18n="nav_collection">Collection</a></li>
@@ -34,9 +46,9 @@
   <section id="home" class="hero-section">
     <div class="hero-overlay"></div>
     <div class="hero-content">
-      <h1 class="hero-title" data-i18n="hero_title_main">Define Your Street Style</h1>
-      <p class="hero-subtitle" data-i18n="hero_desc">A7 هي علامة تجارية عصرية لملابس الشارع تقدم أزياء شبابية جريئة
-        وأسلوب حياة يومي.</p>
+      <div class="slogan-glow"></div>
+      <h1 class="hero-title" data-i18n="hero_title_main">لمسة سحرية لتألق لا ينطفئ</h1>
+      <p class="hero-subtitle" data-i18n="hero_desc">A7 Beauty تقدم أرقى منتجات التجميل وإكسسوارات العناية بالبشرة لتبرزي جمالك الطبيعي.</p>
       <div class="hero-btns">
         <a href="#collection" class="btn" data-i18n="hero_explore">Explore Collection</a>
         <a href="#contact" class="btn btn-outline" data-i18n="hero_contact">Contact Us</a>
@@ -47,9 +59,9 @@
   <!-- Brand Identity Section (Subtle Profile) -->
   <div class="brand-profile">
     <div class="profile-compact">
-      <img src="img/brand.jpg" alt="A7 Store Logo" class="profile-img-small">
+      <img src="https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=200&auto=format&fit=crop" alt="A7 Beauty Logo" class="profile-img-small">
       <div class="profile-text">
-        <h2 class="profile-name">A7 STORE <i data-lucide="check-circle" class="verified-icon"></i></h2>
+        <h2 class="profile-name">A7 BEAUTY <i data-lucide="check-circle" class="verified-icon"></i></h2>
         <div class="profile-meta">
           <span><i data-lucide="map-pin"></i> بردين الزقازيق الشرقية</span>
           <span><i data-lucide="shopping-bag"></i> Shopping & Retail</span>
@@ -83,189 +95,28 @@
   <section class="catalog-controls">
     <div class="search-container">
       <i data-lucide="search"></i>
-      <input type="text" id="productSearch" placeholder="ابحث عن منتج..." onkeyup="searchProducts()">
+      <input type="text" id="productSearch" placeholder="ابحث عن منتج..." data-i18n="[placeholder]search_placeholder" onkeyup="searchProducts()">
     </div>
 
     <div class="category-bar">
       <button class="cat-btn active" onclick="filterCategory('all')" data-i18n="cat_all">الكل</button>
-      <button class="cat-btn" onclick="filterCategory('hoodies')" data-i18n="cat_hoodies">هوديز</button>
-      <button class="cat-btn" onclick="filterCategory('tshirts')" data-i18n="cat_tshirts">تيشيرتات</button>
-      <button class="cat-btn" onclick="filterCategory('pants')" data-i18n="cat_pants">بناطيل</button>
-      <button class="cat-btn" onclick="filterCategory('accessories')" data-i18n="cat_acc">إكسسوارات</button>
+      <button class="cat-btn" onclick="filterCategory('skincare')" data-i18n="cat_skincare">العناية بالبشرة</button>
+      <button class="cat-btn" onclick="filterCategory('makeup')" data-i18n="cat_makeup">مكياج</button>
+      <button class="cat-btn" onclick="filterCategory('hair')" data-i18n="cat_hair">إكسسوارات شعر</button>
+      <button class="cat-btn" onclick="filterCategory('tools')" data-i18n="cat_tools">أدوات تجميل</button>
     </div>
   </section>
 
   <div class="section-divider"></div>
 
 
-  <!-- Collection Section -->
   <section id="collection" class="collection">
     <h2 data-i18n="collection_title">Latest Collection</h2>
-    <div class="collection-grid">
-      <!-- Product 1 -->
-      <div class="product-card" data-category="hoodies">
-        <div class="discount-badge">-10%</div>
-        <div class="product-img-wrapper">
-          <img src="img/product1.jpg" alt="Oversized Heavy Hoodie" class="product-img">
-        </div>
-        <div class="product-info">
-          <h3 class="product-name" data-i18n="p1_name">Oversized Heavy Hoodie</h3>
-          <p class="product-desc" data-i18n="p1_desc">Premium cotton blend, relaxed fit.</p>
-          <div class="product-price"><span class="old-price">LE350.00</span> LE315.00EGP</div>
-          <div class="offer-countdown" id="countdown-p1">
-            <div class="time-unit">
-              <span class="time-val" id="cd-days">07</span>
-              <span class="time-lbl" data-i18n="lbl_days">أيام</span>
-            </div>
-            <div class="time-unit">
-              <span class="time-val" id="cd-hours">00</span>
-              <span class="time-lbl" data-i18n="lbl_hours">ساعة</span>
-            </div>
-            <div class="time-unit">
-              <span class="time-val" id="cd-mins">00</span>
-              <span class="time-lbl" data-i18n="lbl_mins">دقيقة</span>
-            </div>
-            <div class="time-unit">
-              <span class="time-val" id="cd-secs">00</span>
-              <span class="time-lbl" data-i18n="lbl_secs">ثانية</span>
-            </div>
-          </div>
-          <div class="product-action">
-            <button type="button" class="btn" data-i18n="view_buy"
-              onclick="openModal('Oversized Heavy Hoodie', 'LE315.00EGP', ['M', 'L', 'XL', '2XL'], ['img/product1.jpg', 'img/imgproduct1_back.png.png', 'https://placehold.co/600x800/222222/555555?text=Side+Angle'], ['black', 'charcoal'])">View
-              / Buy</button>
-          </div>
-        </div>
-      </div>
-      <!-- Product 2 -->
-      <div class="product-card" data-category="tshirts">
-        <div class="discount-badge">-15%</div>
-        <div class="product-img-wrapper">
-          <img src="img/product2.jpg" alt="A7 Urban Essential" class="product-img">
-        </div>
-        <div class="product-info">
-          <h3 class="product-name" data-i18n="p2_name">A7 Urban Essential</h3>
-          <p class="product-desc" data-i18n="p2_desc">A7 Your Daily Essential.</p>
-          <div class="product-price"><span class="old-price">LE350.00</span> LE297.50EGP</div>
-          <div class="product-action">
-            <button type="button" class="btn" data-i18n="view_buy"
-              onclick="openModal('A7 Urban Essential', 'LE297.50EGP', ['M', 'L', 'XL', '2XL'], ['img/product2.jpg', 'https://placehold.co/600x800/222222/555555?text=Angle+1', 'https://placehold.co/600x800/333333/555555?text=Angle+2'], ['black', 'white'])">View
-              / Buy</button>
-          </div>
-        </div>
-      </div>
-      <!-- Product 3 -->
-      <div class="product-card" data-category="tshirts">
-        <div class="product-img-wrapper">
-          <img src="img/product3.jpg" alt="Essential Logo Tee" class="product-img">
-        </div>
-        <div class="product-info">
-          <h3 class="product-name" data-i18n="p3_name">Essential Logo Tee</h3>
-          <p class="product-desc" data-i18n="p3_desc">Lightweight shirt, subtle print.</p>
-          <div class="product-price">LE800.00EGP</div>
-          <div class="product-action">
-            <button type="button" class="btn" data-i18n="view_buy"
-              onclick="openModal('Essential Logo Tee', 'LE800.00EGP', ['M', 'L', 'XL', '2XL'], ['img/product3.jpg', 'img/product3_main.jpg', 'img/product3_detail.jpg'], ['white', 'black', 'grey'])">View
-              / Buy</button>
-          </div>
-        </div>
-      </div>
-      <!-- Product 4 -->
-      <div class="product-card" data-category="hoodies">
-        <div class="product-img-wrapper">
-          <img src="https://placehold.co/600x800/1a1a1a/555555?text=Product+4" alt="Product" class="product-img">
-        </div>
-        <div class="product-info">
-          <h3 class="product-name" data-i18n="p4_name">Technical Anorak</h3>
-          <p class="product-desc" data-i18n="p4_desc">Weather resistant, half-zip design.</p>
-          <div class="product-price">LE120.00EGP</div>
-          <div class="product-action">
-            <button type="button" class="btn" data-i18n="view_buy"
-              onclick="openModal('Technical Anorak', 'LE120.00EGP', ['M', 'L', 'XL', '2XL'], ['https://placehold.co/600x800/000000/ffffff?text=Standard', 'https://placehold.co/600x800/222222/ffffff?text=Detail', 'https://placehold.co/600x800/444444/ffffff?text=Texture'], ['black', 'navy'])">View
-              / Buy</button>
-          </div>
-        </div>
-      </div>
-      <!-- Product 5 -->
-      <div class="product-card" data-category="pants">
-        <div class="product-img-wrapper">
-          <img src="https://placehold.co/600x800/1a1a1a/555555?text=Product+5" alt="Product" class="product-img">
-        </div>
-        <div class="product-info">
-          <h3 class="product-name" data-i18n="p5_name">Distressed Denim</h3>
-          <p class="product-desc" data-i18n="p5_desc">Straight leg, vintage wash.</p>
-          <div class="product-price">LE110.00EGP</div>
-          <div class="product-action">
-            <button type="button" class="btn" data-i18n="view_buy"
-              onclick="openModal('Distressed Denim', 'LE110.00EGP', ['30', '32', '34', '36'], ['https://placehold.co/600x800/222222/ffffff?text=Denim+1', 'https://placehold.co/600x800/333333/ffffff?text=Denim+2', 'https://placehold.co/600x800/444444/ffffff?text=Denim+3'], ['blue', 'black'])">View
-              / Buy</button>
-          </div>
-        </div>
-      </div>
-      <!-- Product 6 -->
-      <div class="product-card" data-category="accessories">
-        <div class="product-img-wrapper">
-          <img src="https://placehold.co/600x800/1a1a1a/555555?text=Product+6" alt="Product" class="product-img">
-        </div>
-        <div class="product-info">
-          <h3 class="product-name" data-i18n="p6_name">Signature Beanie</h3>
-          <p class="product-desc" data-i18n="p6_desc">Ribbed knit, fold-over cuff.</p>
-          <div class="product-price">LE150.00EGP</div>
-          <div class="product-action">
-            <button type="button" class="btn" data-i18n="view_buy"
-              onclick="openModal('Signature Beanie', 'LE150.00EGP', ['One Size'], ['https://placehold.co/600x800/1a1a1a/555555?text=Beanie+1', 'https://placehold.co/600x800/1a1a1a/777777?text=Beanie+2', 'https://placehold.co/600x800/1a1a1a/999999?text=Beanie+3'], ['black', 'grey'])">View
-              / Buy</button>
-          </div>
-        </div>
-      </div>
-      <!-- Product 7 -->
-      <div class="product-card" data-category="accessories">
-        <div class="product-img-wrapper">
-          <img src="https://placehold.co/600x800/1a1a1a/555555?text=Product+7" alt="Product" class="product-img">
-        </div>
-        <div class="product-info">
-          <h3 class="product-name" data-i18n="p7_name">Urban Crossbody Bag</h3>
-          <p class="product-desc" data-i18n="p7_desc">Nylon shell, adjustable strap.</p>
-          <div class="product-price">LE350.00EGP</div>
-          <div class="product-action">
-            <button type="button" class="btn" data-i18n="view_buy"
-              onclick="openModal('Urban Crossbody Bag', 'LE350.00EGP', ['Adjustable'], ['https://placehold.co/600x800/1a1a1a/555555?text=Bag+1', 'https://placehold.co/600x800/1a1a1a/777777?text=Bag+2', 'https://placehold.co/600x800/1a1a1a/999999?text=Bag+3'], ['black', 'khaki'])">View
-              / Buy</button>
-          </div>
-        </div>
-      </div>
-      <!-- Product 8 -->
-      <div class="product-card" data-category="hoodies">
-        <div class="product-img-wrapper">
-          <img src="https://placehold.co/600x800/1a1a1a/555555?text=Product+8" alt="Product" class="product-img">
-        </div>
-        <div class="product-info">
-          <h3 class="product-name" data-i18n="p8_name">Mock Neck Sweater</h3>
-          <p class="product-desc" data-i18n="p8_desc">Textured knit, dropped shoulders.</p>
-          <div class="product-price">LE550.00EGP</div>
-          <div class="product-action">
-            <button type="button" class="btn" data-i18n="view_buy"
-              onclick="openModal('Mock Neck Sweater', 'LE550.00EGP', ['M', 'L', 'XL', '2XL'], ['https://placehold.co/600x800/1a1a1a/555555?text=Sweater+1', 'https://placehold.co/600x800/1a1a1a/777777?text=Sweater+2', 'https://placehold.co/600x800/1a1a1a/999999?text=Sweater+3'], ['beige', 'black'])">View
-              / Buy</button>
-          </div>
-        </div>
-      </div>
-      <!-- Product 9 -->
-      <div class="product-card" data-category="pants">
-        <div class="product-img-wrapper">
-          <img src="img/cargo_front.png.png" alt="Heritage Cargo Pants" class="product-img">
-        </div>
-        <div class="product-info">
-          <h3 class="product-name" data-i18n="p9_name">Heritage Cargo Pants</h3>
-          <p class="product-desc" data-i18n="p9_desc">Multi-pocket utility, relaxed fit.</p>
-          <div class="product-price">LE650.00EGP</div>
-          <div class="product-action">
-            <button type="button" class="btn" data-i18n="view_buy"
-              onclick="openModal('Heritage Cargo Pants', 'LE650.00EGP', ['30', '32', '34', '36'], ['img/cargo_front.png.png', 'img/cargo_side.png.png', 'img/cargo_back.png.png'], ['black', 'olive', 'gray'])">View
-              / Buy</button>
-          </div>
-        </div>
-      </div>
+    <div id="loading-spinner" data-i18n="loading_products" style="text-align:center; padding:50px; color:#aaa; font-family:'Outfit', sans-serif;">
+      Loading products...
+    </div>
+    <div class="collection-grid" id="collection-grid">
+      <!-- Products will be loaded dynamically via Firebase -->
     </div>
   </section>
 
@@ -305,8 +156,8 @@
   <footer>
     <div class="footer-grid">
       <div class="footer-brand">
-        <h3 data-i18n="footer_brand">A7</h3>
-        <p data-i18n="footer_desc">A7 Modern Streetwear & Youth Fashion.</p>
+        <h3 data-i18n="footer_brand">A7 Beauty</h3>
+        <p data-i18n="footer_desc">A7 Modern Beauty & Premium Accessories.</p>
       </div>
       <div class="footer-links">
         <h4 data-i18n="footer_quick_links">Quick Links</h4>
@@ -328,9 +179,8 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <p data-i18n="footer_copy">&copy; 2026 A7 Streetwear. All rights reserved.</p>
-      <a href="#home" class="back-to-top"><i data-lucide="arrow-up"></i> <span data-i18n="back_to_top">Back to
-          Top</span></a>
+      <p data-i18n="footer_copy">&copy; 2026 A7 Beauty. All rights reserved. <a href="admin.html" style="color: inherit; text-decoration: none; opacity: 0.5; margin-right: 10px; font-size: 0.8rem;">Admin Panel</a></p>
+      <a href="#home" class="back-to-top"><i data-lucide="arrow-up"></i> <span data-i18n="back_to_top">Back to Top</span></a>
     </div>
   </footer>
 

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة تحكم A7</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+
+  <style>
+    body { background-color: #050505; color: white; font-family: 'Cairo', sans-serif; padding: 20px; }
+    .container { max-width: 800px; margin: auto; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #333; padding-bottom: 15px; }
+    .card { background: #111; padding: 20px; border-radius: 12px; border: 1px solid #333; margin-bottom: 20px; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; color: #aaa; }
+    input, select, textarea { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #000; color: white; font-family: 'Cairo', sans-serif; }
+    .btn { background: white; color: black; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.3s; }
+    .btn:hover { background: #ddd; }
+    .btn-danger { background: #e74c3c; color: white; }
+    .btn-danger:hover { background: #c0392b; }
+    
+    #login-section { max-width: 400px; margin: 100px auto; text-align: center; }
+    #admin-section { display: none; }
+    
+    .product-list { display: grid; gap: 15px; }
+    .product-item { display: flex; align-items: center; justify-content: space-between; background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; }
+    .product-item img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; margin-left: 15px; }
+    .product-info { flex: 1; }
+    .product-actions button { margin-right: 10px; width: auto; padding: 8px 15px; }
+    
+    .loading { text-align: center; color: #888; font-size: 1.2rem; display: none; }
+    #msg { margin-top: 10px; color: #2ecc71; text-align: center; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- قسم تسجيل الدخول -->
+    <div id="login-section" class="card">
+      <h2>تسجيل الدخول للمدير</h2>
+      <p style="color:#888; margin-bottom: 20px; font-size: 0.9rem;">
+        أول مرة؟ قم بكتابة الإيميل والباسورد الذي تريده وسيتم إنشاء الحساب تلقائياً!
+      </p>
+      <div class="form-group">
+        <label>البريد الإلكتروني</label>
+        <input type="email" id="email" placeholder="admin@a7.com" dir="ltr">
+      </div>
+      <div class="form-group">
+        <label>كلمة المرور</label>
+        <input type="password" id="password" placeholder="******" dir="ltr">
+      </div>
+      <button class="btn" onclick="login()">دخول / تسجيل حساب</button>
+      <div id="login-msg" style="margin-top: 10px; color: #e74c3c;"></div>
+    </div>
+
+    <!-- قسم لوحة التحكم -->
+    <div id="admin-section">
+      <div class="header">
+        <h2>لوحة التحكم - A7</h2>
+        <button class="btn btn-danger" style="width: auto;" onclick="logout()">تسجيل الخروج</button>
+      </div>
+
+      <div class="card">
+        <h3>إضافة منتج جديد</h3>
+        <div class="form-group">
+          <label>اسم المنتج (عربي)</label>
+          <input type="text" id="p_name_ar" placeholder="مثال: هودي أسود ثقيل">
+        </div>
+        <div class="form-group">
+          <label>اسم المنتج (إنجليزي)</label>
+          <input type="text" id="p_name_en" placeholder="Example: Black Heavy Hoodie">
+        </div>
+        <div class="form-group">
+          <label>السعر الحالي (بالجنيه)</label>
+          <input type="number" id="p_price" placeholder="مثال: 350">
+        </div>
+        <div class="form-group">
+          <label>السعر القديم (لعمل خصم - اختياري)</label>
+          <input type="number" id="p_old_price" placeholder="مثال: 500 (اتركه فارغاً إذا لم يكن هناك خصم)">
+        </div>
+        <div class="form-group">
+          <label>تاريخ انتهاء العرض (يظهر عداد تنازلي للمنتج - اختياري)</label>
+          <input type="date" id="p_offer_end_date">
+        </div>
+        <div class="form-group">
+          <label>القسم</label>
+          <select id="p_category">
+            <option value="skincare">العناية بالبشرة (Skincare)</option>
+            <option value="makeup">المكياج (Makeup)</option>
+            <option value="hair">إكسسوارات الشعر (Hair Accessories)</option>
+            <option value="tools">أدوات التجميل (Beauty Tools)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>المقاسات (افصل بينها بفاصلة ,)</label>
+          <input type="text" id="p_sizes" placeholder="مثال: 50ml, 100ml (اتركه فارغاً ليظهر 'One Size' تلقائياً)">
+        </div>
+        <div class="form-group">
+          <label>الألوان (أسماء بالإنجليزية، افصل بفاصلة ,)</label>
+          <input type="text" id="p_colors" placeholder="مثال: black, white, red (اتركه فارغاً إن لم يوجد)">
+        <div class="form-group">
+          <label>وصف المنتج (عربي)</label>
+          <textarea id="p_desc_ar" rows="2" placeholder="وصف المنتج بالعربي"></textarea>
+        </div>
+        <div class="form-group">
+          <label>وصف المنتج (إنجليزي)</label>
+          <textarea id="p_desc_en" rows="2" placeholder="Product description in English"></textarea>
+        </div>
+        <!-- خيار وضع الصور تمت إزالته بناءً على طلب المدير -->
+        <button class="btn" onclick="addProduct()" id="add-btn">إضافة المنتج للموقع</button>
+        <div id="msg"></div>
+      </div>
+
+      <div class="card">
+        <h3>المنتجات الحالية (<span id="p-count">0</span>)</h3>
+        <div class="loading" id="loading-products">جاري تحميل المنتجات...</div>
+        <div class="product-list" id="products-list">
+          <!-- Products will appear here -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="js/admin.js"></script>
+</body>
+</html>

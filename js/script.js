@@ -1,4 +1,24 @@
 // js/script.js
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCWWHyRw7cdgoy2QSNPwItvs79wvMTn9lo",
+  authDomain: "a7-store-fa7a4.firebaseapp.com",
+  projectId: "a7-store-fa7a4",
+  storageBucket: "a7-store-fa7a4.firebasestorage.app",
+  messagingSenderId: "348232244072",
+  appId: "1:348232244072:web:1348b0cd0a7d80c8a3d4dd",
+  measurementId: "G-CYGS0GWMH2"
+};
+
+// Initialize Firebase
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.firestore();
+
+let allProducts = [];
+let currentLang = 'ar';
+
 document.addEventListener('DOMContentLoaded', () => {
 
   // Intercept scroll for reveal animations
@@ -117,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
   }
 
-  // Start countdown for product 1
+  // Start countdown for product 1 (mock logic for demo)
   const daysEl = document.getElementById('cd-days');
   if (daysEl) {
     startCountdown(7, {
@@ -128,9 +148,248 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Global Dynamic Countdown Timer for Products
+  setInterval(() => {
+    document.querySelectorAll('.dynamic-countdown').forEach(timer => {
+      const endTime = parseInt(timer.getAttribute('data-endtime'));
+      if (!endTime) return;
+      const now = new Date().getTime();
+      const distance = endTime - now;
+
+      if (distance < 0) {
+        timer.style.display = 'none';
+        return;
+      }
+
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const mins = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const secs = Math.floor((distance % (1000 * 60)) / 1000);
+
+      const dEl = timer.querySelector('.cd-d');
+      const hEl = timer.querySelector('.cd-h');
+      const mEl = timer.querySelector('.cd-m');
+      const sEl = timer.querySelector('.cd-s');
+
+      if (dEl) dEl.innerText = days.toString().padStart(2, '0');
+      if (hEl) hEl.innerText = hours.toString().padStart(2, '0');
+      if (mEl) mEl.innerText = mins.toString().padStart(2, '0');
+      if (sEl) sEl.innerText = secs.toString().padStart(2, '0');
+    });
+  }, 1000);
+
   // Set default language and apply
   applyLanguage();
+  
+  // Fetch Products from Firebase
+  fetchProducts();
+
+  // Initialize Background Sparkles
+  initSparkles();
 });
+
+function initSparkles() {
+  const container = document.getElementById('sparkles-container');
+  if (!container) return;
+  
+  const count = 50;
+  for (let i = 0; i < count; i++) {
+    const sparkle = document.createElement('div');
+    sparkle.className = 'sparkle';
+    
+    const size = Math.random() * 3 + 1 + 'px';
+    sparkle.style.width = size;
+    sparkle.style.height = size;
+    
+    sparkle.style.left = Math.random() * 100 + '%';
+    sparkle.style.top = Math.random() * 100 + '%';
+    
+    const duration = Math.random() * 3 + 2 + 's';
+    const delay = Math.random() * 5 + 's';
+    
+    sparkle.style.setProperty('--duration', duration);
+    sparkle.style.setProperty('--delay', delay);
+    
+    container.appendChild(sparkle);
+  }
+}
+
+async function fetchProducts() {
+  const grid = document.getElementById('collection-grid');
+  const spinner = document.getElementById('loading-spinner');
+  
+  try {
+    const snapshot = await db.collection('products').orderBy('createdAt', 'desc').get();
+    
+    // Auto-migrate default products if DB is empty
+    if (snapshot.empty) {
+      await seedDefaultProducts();
+      return; // seedDefaultProducts will call fetchProducts again
+    }
+    
+    spinner.style.display = 'none';
+    allProducts = [];
+    grid.innerHTML = '';
+    
+    snapshot.forEach(doc => {
+      const p = doc.data();
+      p.id = doc.id;
+      allProducts.push(p);
+      renderProductCard(p, grid);
+    });
+    
+  } catch (error) {
+    console.error("Error fetching products: ", error);
+    if(spinner) spinner.innerHTML = "Error loading products.";
+  }
+}
+
+function renderProductCard(p, grid) {
+  const name = currentLang === 'ar' ? p.name_ar : p.name_en;
+  const desc = currentLang === 'ar' ? p.desc_ar : p.desc_en;
+  const mainImage = p.images && p.images.length > 0 ? p.images[0] : 'https://placehold.co/600x800?text=No+Image';
+  
+  let priceDisplay = '';
+  if (p.old_price && p.old_price > p.price) {
+    priceDisplay = `<span class="old-price" style="text-decoration:line-through; color:#888; font-size:0.8em; margin-right:5px;">LE${p.old_price}</span> LE${p.price}${currentLang === 'ar' ? ' جنيه' : 'EGP'}`;
+  } else {
+    priceDisplay = `LE${p.price}${currentLang === 'ar' ? ' جنيه' : 'EGP'}`;
+  }
+
+  let discountBadge = '';
+  if (p.old_price && p.old_price > p.price) {
+    const discount = Math.round(((p.old_price - p.price) / p.old_price) * 100);
+    discountBadge = `<div class="discount-badge" style="position:absolute; top:10px; left:10px; background:red; color:white; padding:5px 10px; font-weight:bold; border-radius:5px; z-index:1;">-${discount}%</div>`;
+  }
+  
+  let countdownHTML = '';
+  if (p.offer_end && p.offer_end > new Date().getTime()) {
+    countdownHTML = `
+      <div class="dynamic-countdown" data-endtime="${p.offer_end}" style="position:absolute; bottom:10px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); color:white; padding:5px 10px; border-radius:5px; display:flex; gap:10px; font-size:0.8rem; z-index:2; direction:ltr;">
+        <div style="text-align:center;"><span class="cd-d" style="font-weight:bold; color:#2ecc71;">00</span><br><span style="font-size:0.6rem;">${translations[currentLang].lbl_days}</span></div>
+        <div style="text-align:center;"><span class="cd-h" style="font-weight:bold;">00</span><br><span style="font-size:0.6rem;">${translations[currentLang].lbl_hours}</span></div>
+        <div style="text-align:center;"><span class="cd-m" style="font-weight:bold;">00</span><br><span style="font-size:0.6rem;">${translations[currentLang].lbl_mins}</span></div>
+        <div style="text-align:center;"><span class="cd-s" style="font-weight:bold; color:#e74c3c;">00</span><br><span style="font-size:0.6rem;">${translations[currentLang].lbl_secs}</span></div>
+      </div>
+    `;
+  }
+  
+  // Pass strings safely
+  const imagesStr = encodeURIComponent(JSON.stringify(p.images || [mainImage]));
+  const sizesStr = encodeURIComponent(JSON.stringify(p.sizes && p.sizes.length > 0 ? p.sizes : ['One Size']));
+  const colorsStr = encodeURIComponent(JSON.stringify(p.colors && p.colors.length > 0 ? p.colors : ['black', 'white']));
+  
+  const cardHTML = `
+    <div class="product-card" data-category="${p.category}" style="position:relative;">
+      ${discountBadge}
+      <div class="product-img-wrapper" style="position:relative;">
+        <img src="${mainImage}" alt="${name}" class="product-img">
+        ${countdownHTML}
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">${name}</h3>
+        <p class="product-desc">${desc}</p>
+        <div class="product-price">${priceDisplay}</div>
+        <div class="product-action">
+          <button type="button" class="btn" onclick="openDynamicModal('${name}', '${p.price}', '${imagesStr}', '${sizesStr}', '${colorsStr}')">${currentLang === 'ar' ? 'عرض / شراء' : 'View / Buy'}</button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  grid.insertAdjacentHTML('beforeend', cardHTML);
+}
+
+function openDynamicModal(name, price, imagesStr, sizesStr, colorsStr) {
+  const images = JSON.parse(decodeURIComponent(imagesStr));
+  const sizes = JSON.parse(decodeURIComponent(sizesStr));
+  const colors = JSON.parse(decodeURIComponent(colorsStr));
+  const displayPrice = `LE${price}${currentLang === 'ar' ? ' جنيه' : 'EGP'}`;
+  openModal(name, displayPrice, sizes, images, colors);
+}
+
+async function seedDefaultProducts() {
+  const beautyProducts = [
+    // Skincare (12)
+    { name_en: "Rose Water Glow Mist", name_ar: "رذاذ الورد لنضارة البشرة", price: 150, category: "skincare", desc_en: "Natural rose water for instant hydration.", desc_ar: "ماء ورد طبيعي لترطيب فوري.", images: ["https://images.unsplash.com/photo-1512496011931-d21fc482624d?w=600&sig=1"] },
+    { name_en: "Vitamin C Brightening Serum", name_ar: "سيروم فيتامين سي للتفتيح", price: 350, category: "skincare", desc_en: "Boosts radiance and evens skin tone.", desc_ar: "يعزز الإشراق ويوحد لون البشرة.", images: ["https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600&sig=2"] },
+    { name_en: "Hyaluronic Acid Gel", name_ar: "جل الهيالورونيك لترطيب عميق", price: 420, category: "skincare", desc_en: "Deep hydration for a youthful look.", desc_ar: "ترطيب عميق لمظهر شبابي.", images: ["https://images.unsplash.com/photo-1594125356689-d9e262176982?w=600&sig=3"] },
+    { name_en: "Night Recovery Oil", name_ar: "زيت التعافي الليلي", price: 480, category: "skincare", desc_en: "Nourishes skin while you sleep.", desc_ar: "يغذي البشرة أثناء النوم.", images: ["https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?w=600&sig=4"] },
+    { name_en: "Charcoal Detox Mask", name_ar: "قناع الفحم للتنقية", price: 120, category: "skincare", desc_en: "Deep cleans pores and removes impurities.", desc_ar: "ينظف المسام بعمق ويزيل الشوائب.", images: ["https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=600&sig=5"] },
+    { name_en: "Jade Facial Roller", name_ar: "أداة تدليك الوجه (اليشم)", price: 250, category: "skincare", desc_en: "Reduces puffiness and improves circulation.", desc_ar: "يقلل الانتفاخ ويحسن الدورة الدموية.", images: ["https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=600&sig=6"] },
+    { name_en: "Sun Defense SPF 50", name_ar: "واقي شمس SPF 50", price: 290, category: "skincare", desc_en: "Lightweight protection against UV rays.", desc_ar: "حماية خفيفة الوزن ضد الأشعة فوق البنفسجية.", images: ["https://images.unsplash.com/photo-1556228515-91ff8093165b?w=600&sig=7"] },
+    { name_en: "Under-Eye Revival Patches", name_ar: "لصقات إحياء منطقة تحت العين", price: 85, category: "skincare", desc_en: "Smooths fine lines and dark circles.", desc_ar: "ينعم الخطوط الدقيقة والهالات السوداء.", images: ["https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=600&sig=8"] },
+    { name_en: "Gentle Cleansing Foam", name_ar: "رغوة تنظيف لطيفة", price: 180, category: "skincare", desc_en: "Cleanses without stripping natural oils.", desc_ar: "ينظف دون تجريد الزيوت الطبيعية.", images: ["https://images.unsplash.com/photo-1556228448-59b0493818c2?w=600&sig=9"] },
+    { name_en: "Exfoliating Coffee Scrub", name_ar: "مقشر القهوة للجسم", price: 140, category: "skincare", desc_en: "Softens skin and improves texture.", desc_ar: "ينعم البشرة ويحسن ملمسها.", images: ["https://images.unsplash.com/photo-1590156221170-e3a10c8f5367?w=600&sig=10"] },
+    { name_en: "Aloe Vera Soothing Gel", name_ar: "جل الصبار المهدئ", price: 110, category: "skincare", desc_en: "Instant relief for sun-exposed skin.", desc_ar: "راحة فورية للبشرة المعرضة للشمس.", images: ["https://images.unsplash.com/photo-1560935817-21a1154563a6?w=600&sig=11"] },
+    { name_en: "Retinol Anti-Aging Cream", name_ar: "كريم الريتينول لمكافحة الشيخوخة", price: 550, category: "skincare", desc_en: "Reduces wrinkles and firms skin.", desc_ar: "يقلل التجاعيد ويشد البشرة.", images: ["https://images.unsplash.com/photo-1594125356689-d9e262176982?w=600&sig=12"] },
+
+    // Makeup (13)
+    { name_en: "Matte Liquid Lipstick", name_ar: "أحمر شفاه سائل مطفي", price: 190, category: "makeup", desc_en: "Long-lasting color with a velvet finish.", desc_ar: "لون يدوم طويلاً مع ملمس مخملي.", images: ["https://images.unsplash.com/photo-1586776977607-310e9c725c37?w=600&sig=13"] },
+    { name_en: "Midnight Mascara", name_ar: "ماسكارا منتصف الليل", price: 220, category: "makeup", desc_en: "Volume and length for dramatic lashes.", desc_ar: "كثافة وطول لرموش درامية.", images: ["https://images.unsplash.com/photo-1512496011931-d21fc482624d?w=600&sig=14"] },
+    { name_en: "Golden Hour Highlighter", name_ar: "هايلايتر الساعة الذهبية", price: 280, category: "makeup", desc_en: "Shimmery glow for a sun-kissed look.", desc_ar: "توهج لامع لمظهر مشرق.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=15"] },
+    { name_en: "Precision Eyeliner Pen", name_ar: "قلم آيلاينر دقيق", price: 160, category: "makeup", desc_en: "Waterproof and smudge-proof application.", desc_ar: "مقاوم للماء والتلطخ.", images: ["https://images.unsplash.com/photo-1512496011931-d21fc482624d?w=600&sig=16"] },
+    { name_en: "Velvet Foundation Stick", name_ar: "عصا كريم أساس مخملي", price: 340, category: "makeup", desc_en: "Full coverage with a natural finish.", desc_ar: "تغطية كاملة مع لمسة طبيعية.", images: ["https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=600&sig=17"] },
+    { name_en: "Nude Eyeshadow Palette", name_ar: "باليت ظلال عيون ترابية", price: 450, category: "makeup", desc_en: "12 versatile shades for any occasion.", desc_ar: "12 درجة متنوعة لكل المناسبات.", images: ["https://images.unsplash.com/photo-1512496011931-d21fc482624d?w=600&sig=18"] },
+    { name_en: "Peach Blush Compact", name_ar: "بلاشر خوخي مدمج", price: 210, category: "makeup", desc_en: "Natural flush for healthy-looking cheeks.", desc_ar: "توريد طبيعي لخدود تبدو صحية.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=19"] },
+    { name_en: "Eyebrow Sculpting Kit", name_ar: "مجموعة نحت الحواجب", price: 240, category: "makeup", desc_en: "Defines and fills for perfect brows.", desc_ar: "يحدد ويملأ لحواجب مثالية.", images: ["https://images.unsplash.com/photo-1512496011931-d21fc482624d?w=600&sig=20"] },
+    { name_en: "Glossy Lip Tint", name_ar: "تنت شفاه لامع", price: 130, category: "makeup", desc_en: "Sheer color with a high-shine finish.", desc_ar: "لون شفاف مع لمعان عالٍ.", images: ["https://images.unsplash.com/photo-1586776977607-310e9c725c37?w=600&sig=21"] },
+    { name_en: "Makeup Setting Spray", name_ar: "بخاخ مثبت مكياج", price: 270, category: "makeup", desc_en: "Locks in your look all day long.", desc_ar: "يثبت مظهرك طوال اليوم.", images: ["https://images.unsplash.com/photo-1512496011931-d21fc482624d?w=600&sig=22"] },
+    { name_en: "Concealer Wand", name_ar: "خافي عيوب سائل", price: 180, category: "makeup", desc_en: "Hides imperfections and brightens eyes.", desc_ar: "يخفي العيوب ويفتح منطقة العين.", images: ["https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=600&sig=23"] },
+    { name_en: "Bronze Goddess Powder", name_ar: "بودرة برونزر آلهة البرونز", price: 310, category: "makeup", desc_en: "Warmth and definition for the face.", desc_ar: "دفء وتحديد للوجه.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=24"] },
+    { name_en: "Lip Liner Pencil", name_ar: "قلم تحديد شفاه", price: 90, category: "makeup", desc_en: "Prevents feathering and defines lips.", desc_ar: "يمنع التلطخ ويحدد الشفاه.", images: ["https://images.unsplash.com/photo-1586776977607-310e9c725c37?w=600&sig=25"] },
+
+    // Hair Accessories (12)
+    { name_en: "Silk Scrunchie Set", name_ar: "مجموعة توك حرير", price: 120, category: "hair", desc_en: "Gentle on hair, prevents breakage.", desc_ar: "لطيفة على الشعر وتمنع التكسر.", images: ["https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=600&sig=26"] },
+    { name_en: "Pearl Hair Clip", name_ar: "مشبك شعر لؤلؤي", price: 75, category: "hair", desc_en: "Elegant accessory for any hairstyle.", desc_ar: "إكسسوار أنيق لأي تسريحة شعر.", images: ["https://images.unsplash.com/photo-1590439471364-192aa70c0b53?w=600&sig=27"] },
+    { name_en: "Velvet Headband", name_ar: "بندانا مخملية", price: 95, category: "hair", desc_en: "Stylish and comfortable all-day wear.", desc_ar: "أنيقة ومريحة للارتداء طوال اليوم.", images: ["https://images.unsplash.com/photo-1535105263431-137a1f262947?w=600&sig=28"] },
+    { name_en: "Matte Claw Clip", name_ar: "توكة كليب مطفية", price: 60, category: "hair", desc_en: "Strong hold for thick hair.", desc_ar: "ثبات قوي للشعر الكثيف.", images: ["https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=600&sig=29"] },
+    { name_en: "Boho Floral Band", name_ar: "طوق شعر بوهيمي مشجر", price: 80, category: "hair", desc_en: "Perfect for summer outings.", desc_ar: "مثالي للخروجات الصيفية.", images: ["https://images.unsplash.com/photo-1563170351-be82bc888bb4?w=600&sig=30"] },
+    { name_en: "Satin Sleep Cap", name_ar: "بونية ستان للنوم", price: 150, category: "hair", desc_en: "Protects curls and reduces frizz.", desc_ar: "يحمي الكيرلي ويقلل الهيشان.", images: ["https://images.unsplash.com/photo-1582095133179-bfd08e2fc6b3?w=600&sig=31"] },
+    { name_en: "Gold Minimalist Pins", name_ar: "بنس شعر ذهبية بسيطة", price: 45, category: "hair", desc_en: "Set of 5 chic metal pins.", desc_ar: "مجموعة من 5 بنس معدنية شيك.", images: ["https://images.unsplash.com/photo-1582095133179-bfd08e2fc6b3?w=600&sig=32"] },
+    { name_en: "Geometric Hair Barrette", name_ar: "توكة شعر هندسية", price: 70, category: "hair", desc_en: "Modern design for a sleek look.", desc_ar: "تصميم عصري لمظهر انسيابي.", images: ["https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=600&sig=33"] },
+    { name_en: "Braided Leather Band", name_ar: "طوق شعر جلد مضفر", price: 110, category: "hair", desc_en: "Adds a touch of edge to your style.", desc_ar: "يضيف لمسة جريئة لأسلوبك.", images: ["https://images.unsplash.com/photo-1535105263431-137a1f262947?w=600&sig=34"] },
+    { name_en: "Crystal Hair Comb", name_ar: "مشط شعر كريستال", price: 180, category: "hair", desc_en: "Sparkling accessory for special events.", desc_ar: "إكسسوار لامع للمناسبات الخاصة.", images: ["https://images.unsplash.com/photo-1590439471364-192aa70c0b53?w=600&sig=35"] },
+    { name_en: "Tortoise Shell Clip", name_ar: "مشبك نقشة النمر", price: 65, category: "hair", desc_en: "Classic pattern that never goes out of style.", desc_ar: "نقشة كلاسيكية لا تنتهي موضتها.", images: ["https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=600&sig=36"] },
+    { name_en: "Sports Grip Headband", name_ar: "بندانا رياضية مانعة للانزلاق", price: 55, category: "hair", desc_en: "Keeps hair back during workouts.", desc_ar: "يبقي الشعر للخلف أثناء التمارين.", images: ["https://images.unsplash.com/photo-1563170351-be82bc888bb4?w=600&sig=37"] },
+
+    // Beauty Tools (13)
+    { name_en: "Professional Brush Set", name_ar: "مجموعة فرش احترافية", price: 650, category: "tools", desc_en: "15 high-quality synthetic brushes.", desc_ar: "15 فرشاة صناعية عالية الجودة.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=38"] },
+    { name_en: "Beauty Blending Sponge", name_ar: "إسفنجة دمج المكياج", price: 80, category: "tools", desc_en: "For a flawless, airbrushed finish.", desc_ar: "للحصول على لمسة نهائية مثالية.", images: ["https://images.unsplash.com/photo-1512496011931-d21fc482624d?w=600&sig=39"] },
+    { name_en: "Heated Eyelash Curler", name_ar: "مكبس رموش حراري", price: 210, category: "tools", desc_en: "Quick and safe curl for your lashes.", desc_ar: "ثني سريع وآمن لرموشك.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=40"] },
+    { name_en: "LED Vanity Mirror", name_ar: "مرآة ليد للمكياج", price: 580, category: "tools", desc_en: "Adjustable brightness for perfect lighting.", desc_ar: "إضاءة قابلة للتعديل لمكياج مثالي.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=41"] },
+    { name_en: "Electronic Pore Vacuum", name_ar: "شفاط دهون المسام الإلكتروني", price: 420, category: "tools", desc_en: "Deep suction to remove blackheads.", desc_ar: "شفط عميق لإزالة الرؤوس السوداء.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=42"] },
+    { name_en: "Rose Gold Tweezers", name_ar: "ملقاط روز جولد", price: 50, category: "tools", desc_en: "Precision grip for easy plucking.", desc_ar: "قبضة دقيقة لسهولة الاستخدام.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=43"] },
+    { name_en: "Facial Steamer", name_ar: "جهاز بخار للوجه", price: 750, category: "tools", desc_en: "Opens pores for better absorption.", desc_ar: "يفتح المسام لامتصاص أفضل.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=44"] },
+    { name_en: "Makeup Organizer Case", name_ar: "شنطة منظم مكياج", price: 320, category: "tools", desc_en: "Keeps your collection tidy and portable.", desc_ar: "تحافظ على مجموعتك مرتبة وسهلة الحمل.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=45"] },
+    { name_en: "Silicone Brush Cleaner", name_ar: "منظف فرش سيليكون", price: 45, category: "tools", desc_en: "Quickly removes makeup residue.", desc_ar: "يزيل بقايا المكياج بسرعة.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=46"] },
+    { name_en: "Micro-Needle Roller", name_ar: "ديرما رولر", price: 260, category: "tools", desc_en: "Stimulates collagen and skin repair.", desc_ar: "يحفز الكولاجين وإصلاح البشرة.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=47"] },
+    { name_en: "Face Mask Applicator", name_ar: "فرشاة فرد ماسك الوجه", price: 35, category: "tools", desc_en: "Hygienic application of creams and masks.", desc_ar: "توزيع صحي للكريمات والأقنعة.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=48"] },
+    { name_en: "Electric Foot File", name_ar: "مبرد قدم كهربائي", price: 380, category: "tools", desc_en: "Removes calluses for soft feet.", desc_ar: "يزيل الجلد الميت لقدمين ناعمتين.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=49"] },
+    { name_en: "Sonic Cleansing Brush", name_ar: "فرشاة تنظيف بالموجات الصوتية", price: 490, category: "tools", desc_en: "Vibrating brush for deep facial cleansing.", desc_ar: "فرشاة مهتزة لتنظيف الوجه بعمق.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=50"] }
+  ];
+  
+  for (const p of beautyProducts) {
+    p.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+    p.sizes = ["One Size"];
+    p.colors = ["Rose Gold", "Silver", "Elegant Black"];
+    await db.collection('products').add(p);
+  }
+  
+  fetchProducts(); // Reload after seeding
+}
+
+// Add this function to the global scope to allow users to reset their DB
+window.resetAndSeedBeauty = async function() {
+  if (confirm("This will delete all current products and add 50 beauty products. Proceed?")) {
+    const snapshot = await db.collection('products').get();
+    const batch = db.batch();
+    snapshot.forEach(doc => batch.delete(doc.ref));
+    await batch.commit();
+    await seedDefaultProducts();
+    alert("Brand converted successfully!");
+  }
+};
 
 function startCountdown(durationInDays, displayElements) {
   let endTime = localStorage.getItem('offerEndTime');
@@ -189,6 +448,13 @@ function toggleLanguage() {
   currentLang = currentLang === 'en' ? 'ar' : 'en';
   applyLanguage();
   if (window.lucide) lucide.createIcons();
+  
+  // Re-render products for new language
+  const grid = document.getElementById('collection-grid');
+  if (grid && allProducts.length > 0) {
+    grid.innerHTML = '';
+    allProducts.forEach(p => renderProductCard(p, grid));
+  }
 }
 
 function filterCategory(category) {
@@ -263,19 +529,19 @@ const translations = {
     nav_collection: "Collection",
 
     nav_contact: "Contact",
-    hero_title: "A7",
-    hero_title_main: "Define Your Street Style",
-    hero_desc: "A7 is a modern streetwear brand delivering bold youth fashion and everyday style.",
+    hero_title: "A7 Beauty",
+    hero_title_main: "A Magical Touch for Eternal Glow",
+    hero_desc: "Discover the finest beauty products and care accessories that give you confidence and elegance in every moment.",
     hero_explore: "Explore Collection",
     hero_contact: "Contact Us",
-    about_title: "About A7",
-    about_p1: "A7 is a youth-focused fashion brand offering a wide range of streetwear clothing designed for everyday confidence and style. We focus on comfort, modern design, and expressive identity.",
-    about_p2: "Our pieces are crafted to empower the youth, blending minimalist aesthetics with high-quality fabrics that stand the test of time and urban lifestyles.",
-    collection_title: "Latest Collection",
+    about_title: "About A7 Beauty",
+    about_p1: "A7 Beauty is a premium brand dedicated to high-quality beauty accessories and skincare tools. We believe in enhancing your natural beauty with the finest materials and elegant designs.",
+    about_p2: "Our curated selection includes everything from professional makeup brushes to luxury skin rollers, ensuring you have the best tools for your beauty routine.",
+    collection_title: "Our Beauty Collection",
     view_buy: "View / Buy",
 
     contact_title: "Get in Touch",
-    contact_subtitle: "Reach out for inquiries.",
+    contact_subtitle: "Reach out for inquiries or beauty tips.",
     form_name: "Your Name",
     form_email: "Your Email",
     form_phone: "Your Phone Number",
@@ -285,54 +551,37 @@ const translations = {
     contact_instagram: 'Instagram',
     contact_facebook: 'Facebook',
     contact_tiktok: 'TikTok',
-    footer_brand: "A7",
-    footer_desc: "A7 Modern Streetwear & Youth Fashion.",
+    footer_brand: "A7 Beauty",
+    footer_desc: "A7 Modern Beauty & Premium Accessories.",
     footer_quick_links: "Quick Links",
     footer_follow: "Follow Us",
-    footer_copy: "© 2026 A7 Streetwear. All rights reserved.",
+    footer_copy: "© 2026 A7 Beauty. All rights reserved.",
     back_to_top: "Back to Top",
-    modal_color: "Select Color:",
-    modal_size: "Select Size:",
-    modal_confirm: "Confirm Purchase",
+    modal_color: "Select Shade/Color:",
+    modal_size: "Select Size/Option:",
+    modal_confirm: "Confirm Order",
     lang_btn: "العربية",
     lbl_days: "Days",
     lbl_hours: "Hours",
     lbl_mins: "Mins",
     lbl_secs: "Secs",
 
-    p1_name: "Oversized Heavy Hoodie",
-    p1_desc: "Premium cotton blend, relaxed fit.",
-    p2_name: "A7 Urban Essential",
-    p2_desc: "A7 Your Daily Essential.",
-    p3_name: "Essential Logo Tee",
-    p3_desc: "Heavyweight jersey, subtle print.",
-    p4_name: "Technical Anorak",
-    p4_desc: "Weather resistant, half-zip design.",
-    p5_name: "Distressed Denim",
-    p5_desc: "Straight leg, vintage wash.",
-    p6_name: "Signature Beanie",
-    p6_desc: "Ribbed knit, fold-over cuff.",
-    p7_name: "Urban Crossbody Bag",
-    p7_desc: "Nylon shell, adjustable strap.",
-    p8_name: "Mock Neck Sweater",
-    p8_desc: "Textured knit, dropped shoulders.",
-    p9_name: "Heritage Cargo Pants",
-    p9_desc: "Multi-pocket utility, relaxed fit.",
-
     modal_qty: "Quantity:",
     feat_quality: "Premium Quality",
-    feat_quality_desc: "100% premium cotton fabrics.",
+    feat_quality_desc: "Dermatologically tested & high-grade materials.",
     feat_shipping: "Fast Delivery",
-    feat_shipping_desc: "Quick shipping to all regions.",
-    feat_exchange: "Easy Exchange",
-    feat_exchange_desc: "Flexible and easy exchange policy.",
-    feat_material: "100% Cotton",
-    feat_design: "Exclusive Design",
-    cat_all: "All",
-    cat_hoodies: "Hoodies",
-    cat_tshirts: "T-Shirts",
-    cat_pants: "Pants",
-    cat_acc: "Accessories"
+    feat_shipping_desc: "Safe & quick delivery to your doorstep.",
+    feat_exchange: "Easy Returns",
+    feat_exchange_desc: "Flexible 14-day return policy.",
+    feat_material: "Eco-Friendly",
+    feat_design: "Elegant Design",
+    cat_all: "All Products",
+    cat_skincare: "Skincare",
+    cat_makeup: "Makeup",
+    cat_hair: "Hair Accessories",
+    cat_tools: "Beauty Tools",
+    search_placeholder: "Search for beauty products...",
+    loading_products: "Loading collection..."
   },
   ar: {
     nav_home: "الرئيسية",
@@ -340,19 +589,19 @@ const translations = {
     nav_collection: "المجموعات",
 
     nav_contact: "اتصل بنا",
-    hero_title: "A7",
-    hero_title_main: "حدد أسلوبك الخاص",
-    hero_desc: "A7 هي علامة تجارية عصرية لملابس الشارع تقدم أزياء شبابية جريئة وأسلوب حياة يومي.",
+    hero_title: "A7 Beauty",
+    hero_title_main: "لمسة سحرية لتألق لا ينطفئ",
+    hero_desc: "اكتشفي أرقى منتجات التجميل وإكسسوارات العناية التي تمنحك الثقة والأناقة في كل لحظة.",
     hero_explore: "استكشف المجموعة",
     hero_contact: "اتصل بنا",
-    about_title: "عن A7",
-    about_p1: "A7 هي علامة تجارية للأزياء تركز على الشباب ، وتقدم مجموعة واسعة من ملابس الشارع المصممة للثقة والأسلوب اليومي. نحن نركز على الراحة والتصميم الحديث والهوية التعبيرية.",
-    about_p2: "تم تصميم قطعنا لتمكين الشباب ، ومزج الجماليات البسيطة مع الأقمشة عالية الجودة التي تصمد أمام اختبار الزمن وأنماط الحياة الحضرية.",
-    collection_title: "أحدث مجموعة",
+    about_title: "عن A7 Beauty",
+    about_p1: "A7 Beauty هي علامة تجارية رائدة متخصصة في إكسسوارات التجميل وأدوات العناية بالبشرة عالية الجودة. نؤمن بتعزيز جمالك الطبيعي من خلال أرقى الخامات والتصاميم الأنيقة.",
+    about_p2: "تشمل مجموعتنا المختارة كل شيء من فرش المكياج الاحترافية إلى أدوات تدليك البشرة الفاخرة، مما يضمن حصولك على أفضل الأدوات لروتين جمالك.",
+    collection_title: "مجموعة الجمال",
     view_buy: "عرض / شراء",
 
     contact_title: "تواصل معنا",
-    contact_subtitle: "تواصل معنا للاستفسارات.",
+    contact_subtitle: "تواصل معنا للاستفسارات أو نصائح الجمال.",
     form_name: "اسمك",
     form_email: "بريدك الإلكتروني",
     form_phone: "رقم هاتفك",
@@ -362,85 +611,76 @@ const translations = {
     contact_instagram: 'إنستجرام',
     contact_facebook: 'فيسبوك',
     contact_tiktok: 'تيك توك',
-    footer_brand: "A7",
-    footer_desc: "A7 ملابس شارع حديثة وأزياء شبابية.",
+    footer_brand: "A7 Beauty",
+    footer_desc: "A7 للجمال الحديث والإكسسوارات الفاخرة.",
     footer_quick_links: "روابط سريعة",
     footer_follow: "تابعنا",
-    footer_copy: "© 2026 A7 لملابس الشارع. جميع الحقوق محفوظة.",
+    footer_copy: "© 2026 A7 Beauty. جميع الحقوق محفوظة.",
     back_to_top: "العودة للأعلى",
-    modal_color: "اختر اللون:",
-    modal_size: "اختر المقاس:",
-    modal_confirm: "تأكيد الشراء",
+    modal_color: "اختر الدرجة/اللون:",
+    modal_size: "اختر الحجم/الخيار:",
+    modal_confirm: "تأكيد الطلب",
     lang_btn: "English",
     lbl_days: "أيام",
     lbl_hours: "ساعة",
     lbl_mins: "دقيقة",
     lbl_secs: "ثانية",
 
-    p1_name: "هودي ثقيل واسع (Oversized)",
-    p1_desc: "مزيج قطن فاخر، مقاس مريح.",
-    p2_name: "A7 أساسيات الحضر",
-    p2_desc: "A7 أساسياتك اليومية.",
-    p3_name: "تيشيرت الشعار الأساسي",
-    p3_desc: "جيرسي ثقيل، طباعة هادئة.",
-    p4_name: "أنوراك تقني",
-    p4_desc: "مقاوم للطقس، تصميم بنصف سحاب.",
-    p5_name: "دينيم مهترئ",
-    p5_desc: "رجل مستقيمة، غسيل كلاسيكي.",
-    p6_name: "بيني مطرز",
-    p6_desc: "حياكة مضلعة، حافة مطوية.",
-    p7_name: "حقيبة كروس حضرية",
-    p7_desc: "غلاف نايلون، حزام قابل للتعديل.",
-    p8_name: "سويتر برقبة وهمية",
-    p8_desc: "حياكة بارزة، أكتاف منسدلة.",
-    p9_name: "بنطلون كارجو تراثي",
-    p9_desc: "جيوب متعددة، مقاس مريح.",
-
     modal_qty: "الكمية:",
     feat_quality: "جودة ممتازة",
-    feat_quality_desc: "خامات قطنية 100% عالية الجودة.",
+    feat_quality_desc: "مختبرة جلدياً ومن مواد عالية الجودة.",
     feat_shipping: "شحن سريع",
-    feat_shipping_desc: "توصيل سريع لجميع المناطق.",
-    feat_exchange: "استبدال سهل",
-    feat_exchange_desc: "سياسة استبدال مرنة وسهلة.",
-    feat_material: "قطن 100%",
-    feat_design: "تصميم حصري",
-    cat_all: "الكل",
-    cat_hoodies: "هوديز",
-    cat_tshirts: "تيشيرتات",
-    cat_pants: "بناطيل",
-    cat_acc: "إكسسوارات"
+    feat_shipping_desc: "توصيل آمن وسريع لباب منزلك.",
+    feat_exchange: "إرجاع سهل",
+    feat_exchange_desc: "سياسة إرجاع مرنة خلال 14 يوماً.",
+    feat_material: "صديق للبيئة",
+    feat_design: "تصميم أنيق",
+    cat_all: "كل المنتجات",
+    cat_skincare: "العناية بالبشرة",
+    cat_makeup: "مكياج",
+    cat_hair: "إكسسوارات شعر",
+    cat_tools: "أدوات تجميل",
+    search_placeholder: "ابحث عن منتجات الجمال...",
+    loading_products: "جاري تحميل المجموعة..."
   }
 };
 
-let currentLang = 'ar';
 
-function toggleLanguage() {
-  currentLang = currentLang === 'en' ? 'ar' : 'en';
-  applyLanguage();
-  if (window.lucide) lucide.createIcons();
-}
 
-function applyLanguage() {
-  document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
-  document.documentElement.lang = currentLang;
-
-  const elements = document.querySelectorAll('[data-i18n]');
-  elements.forEach(el => {
-    const key = el.getAttribute('data-i18n');
-    if (key.startsWith('[placeholder]')) {
-      const actualKey = key.replace('[placeholder]', '');
-      el.placeholder = translations[currentLang][actualKey] || el.placeholder;
-    } else {
-      el.innerHTML = translations[currentLang][key] || el.innerHTML;
-    }
-  });
-
-  const langBtn = document.getElementById('lang-switch');
-  if (langBtn) {
-    langBtn.innerText = currentLang === 'ar' ? 'English' : 'العربية';
+const colorTranslations = {
+  ar: {
+    'black': 'أسود',
+    'white': 'أبيض',
+    'red': 'أحمر',
+    'blue': 'أزرق',
+    'green': 'أخضر',
+    'yellow': 'أصفر',
+    'grey': 'رمادي',
+    'gray': 'رمادي',
+    'navy': 'كحلي',
+    'beige': 'بيج',
+    'brown': 'بني',
+    'orange': 'برتقالي',
+    'purple': 'بنفسجي',
+    'pink': 'بمبي'
+  },
+  en: {
+    'black': 'Black',
+    'white': 'White',
+    'red': 'Red',
+    'blue': 'Blue',
+    'green': 'Green',
+    'yellow': 'Yellow',
+    'grey': 'Grey',
+    'gray': 'Gray',
+    'navy': 'Navy',
+    'beige': 'Beige',
+    'brown': 'Brown',
+    'orange': 'Orange',
+    'purple': 'Purple',
+    'pink': 'Pink'
   }
-}
+};
 
 let selectedColorName = '';
 
@@ -476,7 +716,8 @@ function openModal(name, price, sizes, images, colors) {
       const cBtn = document.createElement('div');
       cBtn.className = 'color-circle' + (index === 0 ? ' active' : '');
       cBtn.style.backgroundColor = color;
-      cBtn.title = color;
+      const translatedColor = colorTranslations[currentLang][color.toLowerCase()] || color;
+      cBtn.title = translatedColor;
       cBtn.onclick = function () {
         document.querySelectorAll('.color-circle').forEach(d => d.classList.remove('active'));
         this.classList.add('active');
@@ -538,7 +779,8 @@ function sendOrder() {
     return;
   }
 
-  const url = `checkout.html?item=${encodeURIComponent(productName)}&price=${encodeURIComponent(price)}&size=${encodeURIComponent(sizeValue)}&color=${encodeURIComponent(selectedColorName)}&qty=${encodeURIComponent(qtyValue)}`;
+  const mainImg = document.getElementById('modalMainImg').src;
+  const url = `checkout.html?item=${encodeURIComponent(productName)}&price=${encodeURIComponent(price)}&size=${encodeURIComponent(sizeValue)}&color=${encodeURIComponent(selectedColorName)}&qty=${encodeURIComponent(qtyValue)}&lang=${currentLang}&img=${encodeURIComponent(mainImg)}`;
   window.location.href = url;
 }
 
