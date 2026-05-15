@@ -238,6 +238,24 @@ async function fetchProducts() {
       renderProductCard(p, grid);
     });
     
+    // Explicitly apply the current active category filter to newly added products
+    const activeBtn = document.querySelector('.cat-btn.active');
+    const activeCategory = activeBtn ? activeBtn.getAttribute('onclick').match(/'([^']+)'/)[1] : 'all';
+    const products = document.querySelectorAll('.product-card');
+    products.forEach(product => {
+      if (activeCategory === 'all' || product.getAttribute('data-category') === activeCategory) {
+        product.style.display = 'block';
+      } else {
+        product.style.display = 'none';
+      }
+    });
+
+    // Also force the collection section to be visible in case IntersectionObserver missed it
+    const collectionSection = document.getElementById('collection');
+    if (collectionSection) {
+      collectionSection.classList.add('visible');
+    }
+    
   } catch (error) {
     console.error("Error fetching products: ", error);
     if(spinner) spinner.innerHTML = "Error loading products.";
@@ -311,62 +329,62 @@ function openDynamicModal(name, price, imagesStr, sizesStr, colorsStr) {
 async function seedDefaultProducts() {
   const beautyProducts = [
     // Skincare (12)
-    { name_en: "Rose Water Glow Mist", name_ar: "رذاذ الورد لنضارة البشرة", price: 150, category: "skincare", desc_en: "Natural rose water for instant hydration.", desc_ar: "ماء ورد طبيعي لترطيب فوري.", images: ["https://images.unsplash.com/photo-1512496011931-d21fc482624d?w=600&sig=1"] },
-    { name_en: "Vitamin C Brightening Serum", name_ar: "سيروم فيتامين سي للتفتيح", price: 350, category: "skincare", desc_en: "Boosts radiance and evens skin tone.", desc_ar: "يعزز الإشراق ويوحد لون البشرة.", images: ["https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600&sig=2"] },
-    { name_en: "Hyaluronic Acid Gel", name_ar: "جل الهيالورونيك لترطيب عميق", price: 420, category: "skincare", desc_en: "Deep hydration for a youthful look.", desc_ar: "ترطيب عميق لمظهر شبابي.", images: ["https://images.unsplash.com/photo-1594125356689-d9e262176982?w=600&sig=3"] },
-    { name_en: "Night Recovery Oil", name_ar: "زيت التعافي الليلي", price: 480, category: "skincare", desc_en: "Nourishes skin while you sleep.", desc_ar: "يغذي البشرة أثناء النوم.", images: ["https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?w=600&sig=4"] },
-    { name_en: "Charcoal Detox Mask", name_ar: "قناع الفحم للتنقية", price: 120, category: "skincare", desc_en: "Deep cleans pores and removes impurities.", desc_ar: "ينظف المسام بعمق ويزيل الشوائب.", images: ["https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=600&sig=5"] },
-    { name_en: "Jade Facial Roller", name_ar: "أداة تدليك الوجه (اليشم)", price: 250, category: "skincare", desc_en: "Reduces puffiness and improves circulation.", desc_ar: "يقلل الانتفاخ ويحسن الدورة الدموية.", images: ["https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=600&sig=6"] },
-    { name_en: "Sun Defense SPF 50", name_ar: "واقي شمس SPF 50", price: 290, category: "skincare", desc_en: "Lightweight protection against UV rays.", desc_ar: "حماية خفيفة الوزن ضد الأشعة فوق البنفسجية.", images: ["https://images.unsplash.com/photo-1556228515-91ff8093165b?w=600&sig=7"] },
-    { name_en: "Under-Eye Revival Patches", name_ar: "لصقات إحياء منطقة تحت العين", price: 85, category: "skincare", desc_en: "Smooths fine lines and dark circles.", desc_ar: "ينعم الخطوط الدقيقة والهالات السوداء.", images: ["https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=600&sig=8"] },
-    { name_en: "Gentle Cleansing Foam", name_ar: "رغوة تنظيف لطيفة", price: 180, category: "skincare", desc_en: "Cleanses without stripping natural oils.", desc_ar: "ينظف دون تجريد الزيوت الطبيعية.", images: ["https://images.unsplash.com/photo-1556228448-59b0493818c2?w=600&sig=9"] },
-    { name_en: "Exfoliating Coffee Scrub", name_ar: "مقشر القهوة للجسم", price: 140, category: "skincare", desc_en: "Softens skin and improves texture.", desc_ar: "ينعم البشرة ويحسن ملمسها.", images: ["https://images.unsplash.com/photo-1590156221170-e3a10c8f5367?w=600&sig=10"] },
-    { name_en: "Aloe Vera Soothing Gel", name_ar: "جل الصبار المهدئ", price: 110, category: "skincare", desc_en: "Instant relief for sun-exposed skin.", desc_ar: "راحة فورية للبشرة المعرضة للشمس.", images: ["https://images.unsplash.com/photo-1560935817-21a1154563a6?w=600&sig=11"] },
-    { name_en: "Retinol Anti-Aging Cream", name_ar: "كريم الريتينول لمكافحة الشيخوخة", price: 550, category: "skincare", desc_en: "Reduces wrinkles and firms skin.", desc_ar: "يقلل التجاعيد ويشد البشرة.", images: ["https://images.unsplash.com/photo-1594125356689-d9e262176982?w=600&sig=12"] },
+    { name_en: "Rose Water Glow Mist", name_ar: "رذاذ الورد لنضارة البشرة", price: 150, category: "skincare", desc_en: "Natural rose water for instant hydration.", desc_ar: "ماء ورد طبيعي لترطيب فوري.", images: ["https://images.unsplash.com/photo-1599305090598-fe179d501227?w=600&fit=crop"] },
+    { name_en: "Vitamin C Brightening Serum", name_ar: "سيروم فيتامين سي للتفتيح", price: 350, category: "skincare", desc_en: "Boosts radiance and evens skin tone.", desc_ar: "يعزز الإشراق ويوحد لون البشرة.", images: ["https://images.unsplash.com/photo-1629198688000-71f23e745b6e?w=600&fit=crop"] },
+    { name_en: "Hyaluronic Acid Gel", name_ar: "جل الهيالورونيك لترطيب عميق", price: 420, category: "skincare", desc_en: "Deep hydration for a youthful look.", desc_ar: "ترطيب عميق لمظهر شبابي.", images: ["https://images.unsplash.com/photo-1617897903246-719242758050?w=600&fit=crop"] },
+    { name_en: "Night Recovery Oil", name_ar: "زيت التعافي الليلي", price: 480, category: "skincare", desc_en: "Nourishes skin while you sleep.", desc_ar: "يغذي البشرة أثناء النوم.", images: ["https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=600&fit=crop"] },
+    { name_en: "Charcoal Detox Mask", name_ar: "قناع الفحم للتنقية", price: 120, category: "skincare", desc_en: "Deep cleans pores and removes impurities.", desc_ar: "ينظف المسام بعمق ويزيل الشوائب.", images: ["https://images.unsplash.com/photo-1615397323356-11f81d5854ad?w=600&fit=crop"] },
+    { name_en: "Jade Facial Roller", name_ar: "أداة تدليك الوجه (اليشم)", price: 250, category: "skincare", desc_en: "Reduces puffiness and improves circulation.", desc_ar: "يقلل الانتفاخ ويحسن الدورة الدموية.", images: ["https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600&fit=crop"] },
+    { name_en: "Sun Defense SPF 50", name_ar: "واقي شمس SPF 50", price: 290, category: "skincare", desc_en: "Lightweight protection against UV rays.", desc_ar: "حماية خفيفة الوزن ضد الأشعة فوق البنفسجية.", images: ["https://cdn.dummyjson.com/product-images/skin-care/olay-ultra-moisture-shea-butter-body-wash/1.webp"] },
+    { name_en: "Under-Eye Revival Patches", name_ar: "لصقات إحياء منطقة تحت العين", price: 85, category: "skincare", desc_en: "Smooths fine lines and dark circles.", desc_ar: "ينعم الخطوط الدقيقة والهالات السوداء.", images: ["https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=600&fit=crop"] },
+    { name_en: "Gentle Cleansing Foam", name_ar: "رغوة تنظيف لطيفة", price: 180, category: "skincare", desc_en: "Cleanses without stripping natural oils.", desc_ar: "ينظف دون تجريد الزيوت الطبيعية.", images: ["https://cdn.dummyjson.com/product-images/skin-care/attitude-super-leaves-hand-soap/1.webp"] },
+    { name_en: "Exfoliating Coffee Scrub", name_ar: "مقشر القهوة للجسم", price: 140, category: "skincare", desc_en: "Softens skin and improves texture.", desc_ar: "ينعم البشرة ويحسن ملمسها.", images: ["https://images.unsplash.com/photo-1596755094514-f87e32f85e2c?w=600&fit=crop"] },
+    { name_en: "Aloe Vera Soothing Gel", name_ar: "جل الصبار المهدئ", price: 110, category: "skincare", desc_en: "Instant relief for sun-exposed skin.", desc_ar: "راحة فورية للبشرة المعرضة للشمس.", images: ["https://cdn.dummyjson.com/product-images/skin-care/vaseline-men-body-and-face-lotion/1.webp"] },
+    { name_en: "Retinol Anti-Aging Cream", name_ar: "كريم الريتينول لمكافحة الشيخوخة", price: 550, category: "skincare", desc_en: "Reduces wrinkles and firms skin.", desc_ar: "يقلل التجاعيد ويشد البشرة.", images: ["https://images.unsplash.com/photo-1583241496466-930ffc878e47?w=600&fit=crop"] },
 
     // Makeup (13)
-    { name_en: "Matte Liquid Lipstick", name_ar: "أحمر شفاه سائل مطفي", price: 190, category: "makeup", desc_en: "Long-lasting color with a velvet finish.", desc_ar: "لون يدوم طويلاً مع ملمس مخملي.", images: ["https://images.unsplash.com/photo-1586776977607-310e9c725c37?w=600&sig=13"] },
-    { name_en: "Midnight Mascara", name_ar: "ماسكارا منتصف الليل", price: 220, category: "makeup", desc_en: "Volume and length for dramatic lashes.", desc_ar: "كثافة وطول لرموش درامية.", images: ["https://images.unsplash.com/photo-1512496011931-d21fc482624d?w=600&sig=14"] },
-    { name_en: "Golden Hour Highlighter", name_ar: "هايلايتر الساعة الذهبية", price: 280, category: "makeup", desc_en: "Shimmery glow for a sun-kissed look.", desc_ar: "توهج لامع لمظهر مشرق.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=15"] },
-    { name_en: "Precision Eyeliner Pen", name_ar: "قلم آيلاينر دقيق", price: 160, category: "makeup", desc_en: "Waterproof and smudge-proof application.", desc_ar: "مقاوم للماء والتلطخ.", images: ["https://images.unsplash.com/photo-1512496011931-d21fc482624d?w=600&sig=16"] },
-    { name_en: "Velvet Foundation Stick", name_ar: "عصا كريم أساس مخملي", price: 340, category: "makeup", desc_en: "Full coverage with a natural finish.", desc_ar: "تغطية كاملة مع لمسة طبيعية.", images: ["https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=600&sig=17"] },
-    { name_en: "Nude Eyeshadow Palette", name_ar: "باليت ظلال عيون ترابية", price: 450, category: "makeup", desc_en: "12 versatile shades for any occasion.", desc_ar: "12 درجة متنوعة لكل المناسبات.", images: ["https://images.unsplash.com/photo-1512496011931-d21fc482624d?w=600&sig=18"] },
-    { name_en: "Peach Blush Compact", name_ar: "بلاشر خوخي مدمج", price: 210, category: "makeup", desc_en: "Natural flush for healthy-looking cheeks.", desc_ar: "توريد طبيعي لخدود تبدو صحية.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=19"] },
-    { name_en: "Eyebrow Sculpting Kit", name_ar: "مجموعة نحت الحواجب", price: 240, category: "makeup", desc_en: "Defines and fills for perfect brows.", desc_ar: "يحدد ويملأ لحواجب مثالية.", images: ["https://images.unsplash.com/photo-1512496011931-d21fc482624d?w=600&sig=20"] },
-    { name_en: "Glossy Lip Tint", name_ar: "تنت شفاه لامع", price: 130, category: "makeup", desc_en: "Sheer color with a high-shine finish.", desc_ar: "لون شفاف مع لمعان عالٍ.", images: ["https://images.unsplash.com/photo-1586776977607-310e9c725c37?w=600&sig=21"] },
-    { name_en: "Makeup Setting Spray", name_ar: "بخاخ مثبت مكياج", price: 270, category: "makeup", desc_en: "Locks in your look all day long.", desc_ar: "يثبت مظهرك طوال اليوم.", images: ["https://images.unsplash.com/photo-1512496011931-d21fc482624d?w=600&sig=22"] },
-    { name_en: "Concealer Wand", name_ar: "خافي عيوب سائل", price: 180, category: "makeup", desc_en: "Hides imperfections and brightens eyes.", desc_ar: "يخفي العيوب ويفتح منطقة العين.", images: ["https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=600&sig=23"] },
-    { name_en: "Bronze Goddess Powder", name_ar: "بودرة برونزر آلهة البرونز", price: 310, category: "makeup", desc_en: "Warmth and definition for the face.", desc_ar: "دفء وتحديد للوجه.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=24"] },
-    { name_en: "Lip Liner Pencil", name_ar: "قلم تحديد شفاه", price: 90, category: "makeup", desc_en: "Prevents feathering and defines lips.", desc_ar: "يمنع التلطخ ويحدد الشفاه.", images: ["https://images.unsplash.com/photo-1586776977607-310e9c725c37?w=600&sig=25"] },
+    { name_en: "Matte Liquid Lipstick", name_ar: "أحمر شفاه سائل مطفي", price: 190, category: "makeup", desc_en: "Long-lasting color with a velvet finish.", desc_ar: "لون يدوم طويلاً مع ملمس مخملي.", images: ["https://cdn.dummyjson.com/product-images/beauty/red-lipstick/1.webp"] },
+    { name_en: "Midnight Mascara", name_ar: "ماسكارا منتصف الليل", price: 220, category: "makeup", desc_en: "Volume and length for dramatic lashes.", desc_ar: "كثافة وطول لرموش درامية.", images: ["https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/1.webp"] },
+    { name_en: "Golden Hour Highlighter", name_ar: "هايلايتر الساعة الذهبية", price: 280, category: "makeup", desc_en: "Shimmery glow for a sun-kissed look.", desc_ar: "توهج لامع لمظهر مشرق.", images: ["https://images.unsplash.com/photo-1512496015851-a1faebefadd9?w=600&fit=crop"] },
+    { name_en: "Precision Eyeliner Pen", name_ar: "قلم آيلاينر دقيق", price: 160, category: "makeup", desc_en: "Waterproof and smudge-proof application.", desc_ar: "مقاوم للماء والتلطخ.", images: ["https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&fit=crop"] },
+    { name_en: "Velvet Foundation Stick", name_ar: "عصا كريم أساس مخملي", price: 340, category: "makeup", desc_en: "Full coverage with a natural finish.", desc_ar: "تغطية كاملة مع لمسة طبيعية.", images: ["https://cdn.dummyjson.com/product-images/beauty/powder-canister/1.webp"] },
+    { name_en: "Nude Eyeshadow Palette", name_ar: "باليت ظلال عيون ترابية", price: 450, category: "makeup", desc_en: "12 versatile shades for any occasion.", desc_ar: "12 درجة متنوعة لكل المناسبات.", images: ["https://cdn.dummyjson.com/product-images/beauty/eyeshadow-palette-with-mirror/1.webp"] },
+    { name_en: "Peach Blush Compact", name_ar: "بلاشر خوخي مدمج", price: 210, category: "makeup", desc_en: "Natural flush for healthy-looking cheeks.", desc_ar: "توريد طبيعي لخدود تبدو صحية.", images: ["https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&fit=crop"] },
+    { name_en: "Eyebrow Sculpting Kit", name_ar: "مجموعة نحت الحواجب", price: 240, category: "makeup", desc_en: "Defines and fills for perfect brows.", desc_ar: "يحدد ويملأ لحواجب مثالية.", images: ["https://images.unsplash.com/photo-1625080036655-b46eb24e4d41?w=600&fit=crop"] },
+    { name_en: "Glossy Lip Tint", name_ar: "تنت شفاه لامع", price: 130, category: "makeup", desc_en: "Sheer color with a high-shine finish.", desc_ar: "لون شفاف مع لمعان عالٍ.", images: ["https://cdn.dummyjson.com/product-images/beauty/red-nail-polish/1.webp"] },
+    { name_en: "Makeup Setting Spray", name_ar: "بخاخ مثبت مكياج", price: 270, category: "makeup", desc_en: "Locks in your look all day long.", desc_ar: "يثبت مظهرك طوال اليوم.", images: ["https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?w=600&fit=crop"] },
+    { name_en: "Concealer Wand", name_ar: "خافي عيوب سائل", price: 180, category: "makeup", desc_en: "Hides imperfections and brightens eyes.", desc_ar: "يخفي العيوب ويفتح منطقة العين.", images: ["https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=600&fit=crop"] },
+    { name_en: "Bronze Goddess Powder", name_ar: "بودرة برونزر آلهة البرونز", price: 310, category: "makeup", desc_en: "Warmth and definition for the face.", desc_ar: "دفء وتحديد للوجه.", images: ["https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=600&fit=crop"] },
+    { name_en: "Lip Liner Pencil", name_ar: "قلم تحديد شفاه", price: 90, category: "makeup", desc_en: "Prevents feathering and defines lips.", desc_ar: "يمنع التلطخ ويحدد الشفاه.", images: ["https://images.unsplash.com/photo-1596755094514-f87e32f85e2c?w=600&fit=crop"] },
 
     // Hair Accessories (12)
-    { name_en: "Silk Scrunchie Set", name_ar: "مجموعة توك حرير", price: 120, category: "hair", desc_en: "Gentle on hair, prevents breakage.", desc_ar: "لطيفة على الشعر وتمنع التكسر.", images: ["https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=600&sig=26"] },
-    { name_en: "Pearl Hair Clip", name_ar: "مشبك شعر لؤلؤي", price: 75, category: "hair", desc_en: "Elegant accessory for any hairstyle.", desc_ar: "إكسسوار أنيق لأي تسريحة شعر.", images: ["https://images.unsplash.com/photo-1590439471364-192aa70c0b53?w=600&sig=27"] },
-    { name_en: "Velvet Headband", name_ar: "بندانا مخملية", price: 95, category: "hair", desc_en: "Stylish and comfortable all-day wear.", desc_ar: "أنيقة ومريحة للارتداء طوال اليوم.", images: ["https://images.unsplash.com/photo-1535105263431-137a1f262947?w=600&sig=28"] },
-    { name_en: "Matte Claw Clip", name_ar: "توكة كليب مطفية", price: 60, category: "hair", desc_en: "Strong hold for thick hair.", desc_ar: "ثبات قوي للشعر الكثيف.", images: ["https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=600&sig=29"] },
-    { name_en: "Boho Floral Band", name_ar: "طوق شعر بوهيمي مشجر", price: 80, category: "hair", desc_en: "Perfect for summer outings.", desc_ar: "مثالي للخروجات الصيفية.", images: ["https://images.unsplash.com/photo-1563170351-be82bc888bb4?w=600&sig=30"] },
-    { name_en: "Satin Sleep Cap", name_ar: "بونية ستان للنوم", price: 150, category: "hair", desc_en: "Protects curls and reduces frizz.", desc_ar: "يحمي الكيرلي ويقلل الهيشان.", images: ["https://images.unsplash.com/photo-1582095133179-bfd08e2fc6b3?w=600&sig=31"] },
-    { name_en: "Gold Minimalist Pins", name_ar: "بنس شعر ذهبية بسيطة", price: 45, category: "hair", desc_en: "Set of 5 chic metal pins.", desc_ar: "مجموعة من 5 بنس معدنية شيك.", images: ["https://images.unsplash.com/photo-1582095133179-bfd08e2fc6b3?w=600&sig=32"] },
-    { name_en: "Geometric Hair Barrette", name_ar: "توكة شعر هندسية", price: 70, category: "hair", desc_en: "Modern design for a sleek look.", desc_ar: "تصميم عصري لمظهر انسيابي.", images: ["https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=600&sig=33"] },
-    { name_en: "Braided Leather Band", name_ar: "طوق شعر جلد مضفر", price: 110, category: "hair", desc_en: "Adds a touch of edge to your style.", desc_ar: "يضيف لمسة جريئة لأسلوبك.", images: ["https://images.unsplash.com/photo-1535105263431-137a1f262947?w=600&sig=34"] },
-    { name_en: "Crystal Hair Comb", name_ar: "مشط شعر كريستال", price: 180, category: "hair", desc_en: "Sparkling accessory for special events.", desc_ar: "إكسسوار لامع للمناسبات الخاصة.", images: ["https://images.unsplash.com/photo-1590439471364-192aa70c0b53?w=600&sig=35"] },
-    { name_en: "Tortoise Shell Clip", name_ar: "مشبك نقشة النمر", price: 65, category: "hair", desc_en: "Classic pattern that never goes out of style.", desc_ar: "نقشة كلاسيكية لا تنتهي موضتها.", images: ["https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=600&sig=36"] },
-    { name_en: "Sports Grip Headband", name_ar: "بندانا رياضية مانعة للانزلاق", price: 55, category: "hair", desc_en: "Keeps hair back during workouts.", desc_ar: "يبقي الشعر للخلف أثناء التمارين.", images: ["https://images.unsplash.com/photo-1563170351-be82bc888bb4?w=600&sig=37"] },
+    { name_en: "Silk Scrunchie Set", name_ar: "مجموعة توك حرير", price: 120, category: "hair", desc_en: "Gentle on hair, prevents breakage.", desc_ar: "لطيفة على الشعر وتمنع التكسر.", images: ["https://cdn.dummyjson.com/product-images/fragrances/calvin-klein-ck-one/1.webp"] },
+    { name_en: "Pearl Hair Clip", name_ar: "مشبك شعر لؤلؤي", price: 75, category: "hair", desc_en: "Elegant accessory for any hairstyle.", desc_ar: "إكسسوار أنيق لأي تسريحة شعر.", images: ["https://cdn.dummyjson.com/product-images/fragrances/chanel-coco-noir-eau-de/1.webp"] },
+    { name_en: "Velvet Headband", name_ar: "بندانا مخملية", price: 95, category: "hair", desc_en: "Stylish and comfortable all-day wear.", desc_ar: "أنيقة ومريحة للارتداء طوال اليوم.", images: ["https://images.unsplash.com/photo-1629198688000-71f23e745b6e?w=600&fit=crop"] },
+    { name_en: "Matte Claw Clip", name_ar: "توكة كليب مطفية", price: 60, category: "hair", desc_en: "Strong hold for thick hair.", desc_ar: "ثبات قوي للشعر الكثيف.", images: ["https://images.unsplash.com/photo-1583241496466-930ffc878e47?w=600&fit=crop"] },
+    { name_en: "Boho Floral Band", name_ar: "طوق شعر بوهيمي مشجر", price: 80, category: "hair", desc_en: "Perfect for summer outings.", desc_ar: "مثالي للخروجات الصيفية.", images: ["https://cdn.dummyjson.com/product-images/fragrances/dior-jadore/1.webp"] },
+    { name_en: "Satin Sleep Cap", name_ar: "بونية ستان للنوم", price: 150, category: "hair", desc_en: "Protects curls and reduces frizz.", desc_ar: "يحمي الكيرلي ويقلل الهيشان.", images: ["https://cdn.dummyjson.com/product-images/fragrances/dolce-shine-eau-de/1.webp"] },
+    { name_en: "Gold Minimalist Pins", name_ar: "بنس شعر ذهبية بسيطة", price: 45, category: "hair", desc_en: "Set of 5 chic metal pins.", desc_ar: "مجموعة من 5 بنس معدنية شيك.", images: ["https://images.unsplash.com/photo-1615397323356-11f81d5854ad?w=600&fit=crop"] },
+    { name_en: "Geometric Hair Barrette", name_ar: "توكة شعر هندسية", price: 70, category: "hair", desc_en: "Modern design for a sleek look.", desc_ar: "تصميم عصري لمظهر انسيابي.", images: ["https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600&fit=crop"] },
+    { name_en: "Braided Leather Band", name_ar: "طوق شعر جلد مضفر", price: 110, category: "hair", desc_en: "Adds a touch of edge to your style.", desc_ar: "يضيف لمسة جريئة لأسلوبك.", images: ["https://cdn.dummyjson.com/product-images/fragrances/gucci-bloom-eau-de/1.webp"] },
+    { name_en: "Crystal Hair Comb", name_ar: "مشط شعر كريستال", price: 180, category: "hair", desc_en: "Sparkling accessory for special events.", desc_ar: "إكسسوار لامع للمناسبات الخاصة.", images: ["https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=600&fit=crop"] },
+    { name_en: "Tortoise Shell Clip", name_ar: "مشبك نقشة النمر", price: 65, category: "hair", desc_en: "Classic pattern that never goes out of style.", desc_ar: "نقشة كلاسيكية لا تنتهي موضتها.", images: ["https://images.unsplash.com/photo-1512496015851-a1faebefadd9?w=600&fit=crop"] },
+    { name_en: "Sports Grip Headband", name_ar: "بندانا رياضية مانعة للانزلاق", price: 55, category: "hair", desc_en: "Keeps hair back during workouts.", desc_ar: "يبقي الشعر للخلف أثناء التمارين.", images: ["https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&fit=crop"] },
 
     // Beauty Tools (13)
-    { name_en: "Professional Brush Set", name_ar: "مجموعة فرش احترافية", price: 650, category: "tools", desc_en: "15 high-quality synthetic brushes.", desc_ar: "15 فرشاة صناعية عالية الجودة.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=38"] },
-    { name_en: "Beauty Blending Sponge", name_ar: "إسفنجة دمج المكياج", price: 80, category: "tools", desc_en: "For a flawless, airbrushed finish.", desc_ar: "للحصول على لمسة نهائية مثالية.", images: ["https://images.unsplash.com/photo-1512496011931-d21fc482624d?w=600&sig=39"] },
-    { name_en: "Heated Eyelash Curler", name_ar: "مكبس رموش حراري", price: 210, category: "tools", desc_en: "Quick and safe curl for your lashes.", desc_ar: "ثني سريع وآمن لرموشك.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=40"] },
-    { name_en: "LED Vanity Mirror", name_ar: "مرآة ليد للمكياج", price: 580, category: "tools", desc_en: "Adjustable brightness for perfect lighting.", desc_ar: "إضاءة قابلة للتعديل لمكياج مثالي.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=41"] },
-    { name_en: "Electronic Pore Vacuum", name_ar: "شفاط دهون المسام الإلكتروني", price: 420, category: "tools", desc_en: "Deep suction to remove blackheads.", desc_ar: "شفط عميق لإزالة الرؤوس السوداء.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=42"] },
-    { name_en: "Rose Gold Tweezers", name_ar: "ملقاط روز جولد", price: 50, category: "tools", desc_en: "Precision grip for easy plucking.", desc_ar: "قبضة دقيقة لسهولة الاستخدام.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=43"] },
-    { name_en: "Facial Steamer", name_ar: "جهاز بخار للوجه", price: 750, category: "tools", desc_en: "Opens pores for better absorption.", desc_ar: "يفتح المسام لامتصاص أفضل.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=44"] },
-    { name_en: "Makeup Organizer Case", name_ar: "شنطة منظم مكياج", price: 320, category: "tools", desc_en: "Keeps your collection tidy and portable.", desc_ar: "تحافظ على مجموعتك مرتبة وسهلة الحمل.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=45"] },
-    { name_en: "Silicone Brush Cleaner", name_ar: "منظف فرش سيليكون", price: 45, category: "tools", desc_en: "Quickly removes makeup residue.", desc_ar: "يزيل بقايا المكياج بسرعة.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=46"] },
-    { name_en: "Micro-Needle Roller", name_ar: "ديرما رولر", price: 260, category: "tools", desc_en: "Stimulates collagen and skin repair.", desc_ar: "يحفز الكولاجين وإصلاح البشرة.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=47"] },
-    { name_en: "Face Mask Applicator", name_ar: "فرشاة فرد ماسك الوجه", price: 35, category: "tools", desc_en: "Hygienic application of creams and masks.", desc_ar: "توزيع صحي للكريمات والأقنعة.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=48"] },
-    { name_en: "Electric Foot File", name_ar: "مبرد قدم كهربائي", price: 380, category: "tools", desc_en: "Removes calluses for soft feet.", desc_ar: "يزيل الجلد الميت لقدمين ناعمتين.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=49"] },
-    { name_en: "Sonic Cleansing Brush", name_ar: "فرشاة تنظيف بالموجات الصوتية", price: 490, category: "tools", desc_en: "Vibrating brush for deep facial cleansing.", desc_ar: "فرشاة مهتزة لتنظيف الوجه بعمق.", images: ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&sig=50"] }
+    { name_en: "Professional Brush Set", name_ar: "مجموعة فرش احترافية", price: 650, category: "tools", desc_en: "15 high-quality synthetic brushes.", desc_ar: "15 فرشاة صناعية عالية الجودة.", images: ["https://images.unsplash.com/photo-1596755094514-f87e32f85e2c?w=600&fit=crop"] },
+    { name_en: "Beauty Blending Sponge", name_ar: "إسفنجة دمج المكياج", price: 80, category: "tools", desc_en: "For a flawless, airbrushed finish.", desc_ar: "للحصول على لمسة نهائية مثالية.", images: ["https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=600&fit=crop"] },
+    { name_en: "Heated Eyelash Curler", name_ar: "مكبس رموش حراري", price: 210, category: "tools", desc_en: "Quick and safe curl for your lashes.", desc_ar: "ثني سريع وآمن لرموشك.", images: ["https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=600&fit=crop"] },
+    { name_en: "LED Vanity Mirror", name_ar: "مرآة ليد للمكياج", price: 580, category: "tools", desc_en: "Adjustable brightness for perfect lighting.", desc_ar: "إضاءة قابلة للتعديل لمكياج مثالي.", images: ["https://images.unsplash.com/photo-1629198688000-71f23e745b6e?w=600&fit=crop"] },
+    { name_en: "Electronic Pore Vacuum", name_ar: "شفاط دهون المسام الإلكتروني", price: 420, category: "tools", desc_en: "Deep suction to remove blackheads.", desc_ar: "شفط عميق لإزالة الرؤوس السوداء.", images: ["https://images.unsplash.com/photo-1617897903246-719242758050?w=600&fit=crop"] },
+    { name_en: "Rose Gold Tweezers", name_ar: "ملقاط روز جولد", price: 50, category: "tools", desc_en: "Precision grip for easy plucking.", desc_ar: "قبضة دقيقة لسهولة الاستخدام.", images: ["https://images.unsplash.com/photo-1599305090598-fe179d501227?w=600&fit=crop"] },
+    { name_en: "Facial Steamer", name_ar: "جهاز بخار للوجه", price: 750, category: "tools", desc_en: "Opens pores for better absorption.", desc_ar: "يفتح المسام لامتصاص أفضل.", images: ["https://images.unsplash.com/photo-1615397323356-11f81d5854ad?w=600&fit=crop"] },
+    { name_en: "Makeup Organizer Case", name_ar: "شنطة منظم مكياج", price: 320, category: "tools", desc_en: "Keeps your collection tidy and portable.", desc_ar: "تحافظ على مجموعتك مرتبة وسهلة الحمل.", images: ["https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600&fit=crop"] },
+    { name_en: "Silicone Brush Cleaner", name_ar: "منظف فرش سيليكون", price: 45, category: "tools", desc_en: "Quickly removes makeup residue.", desc_ar: "يزيل بقايا المكياج بسرعة.", images: ["https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=600&fit=crop"] },
+    { name_en: "Micro-Needle Roller", name_ar: "ديرما رولر", price: 260, category: "tools", desc_en: "Stimulates collagen and skin repair.", desc_ar: "يحفز الكولاجين وإصلاح البشرة.", images: ["https://images.unsplash.com/photo-1583241496466-930ffc878e47?w=600&fit=crop"] },
+    { name_en: "Face Mask Applicator", name_ar: "فرشاة فرد ماسك الوجه", price: 35, category: "tools", desc_en: "Hygienic application of creams and masks.", desc_ar: "توزيع صحي للكريمات والأقنعة.", images: ["https://images.unsplash.com/photo-1625080036655-b46eb24e4d41?w=600&fit=crop"] },
+    { name_en: "Electric Foot File", name_ar: "مبرد قدم كهربائي", price: 380, category: "tools", desc_en: "Removes calluses for soft feet.", desc_ar: "يزيل الجلد الميت لقدمين ناعمتين.", images: ["https://images.unsplash.com/photo-1512496015851-a1faebefadd9?w=600&fit=crop"] },
+    { name_en: "Sonic Cleansing Brush", name_ar: "فرشاة تنظيف بالموجات الصوتية", price: 490, category: "tools", desc_en: "Vibrating brush for deep facial cleansing.", desc_ar: "فرشاة مهتزة لتنظيف الوجه بعمق.", images: ["https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&fit=crop"] }
   ];
   
   for (const p of beautyProducts) {
@@ -457,12 +475,21 @@ function toggleLanguage() {
   }
 }
 
-function filterCategory(category) {
+function filterCategory(category, btnElement) {
   const products = document.querySelectorAll('.product-card');
   const buttons = document.querySelectorAll('.cat-btn');
 
   buttons.forEach(btn => btn.classList.remove('active'));
-  event.target.classList.add('active');
+  
+  if (btnElement) {
+    btnElement.classList.add('active');
+  } else if (typeof event !== 'undefined' && event && event.target) {
+    event.target.classList.add('active');
+  } else {
+    // Fallback: try to find the button for this category
+    const targetBtn = document.querySelector(`.cat-btn[onclick*="'${category}'"]`);
+    if (targetBtn) targetBtn.classList.add('active');
+  }
 
   products.forEach(product => {
     if (category === 'all' || product.getAttribute('data-category') === category) {
@@ -474,7 +501,7 @@ function filterCategory(category) {
 
   // Scroll to collection start
   const collection = document.getElementById('collection');
-  if (collection) {
+  if (collection && typeof event !== 'undefined' && event && event.type === 'click') {
     const offset = 80; // Space for sticky nav
     const bodyRect = document.body.getBoundingClientRect().top;
     const elementRect = collection.getBoundingClientRect().top;
