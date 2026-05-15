@@ -94,15 +94,15 @@
         <div class="form-group">
           <label>القسم</label>
           <select id="p_category">
-            <option value="hoodies">هوديز (Hoodies)</option>
-            <option value="tshirts">تيشيرتات (T-Shirts)</option>
-            <option value="pants">بناطيل (Pants)</option>
-            <option value="accessories">إكسسوارات (Accessories)</option>
+            <option value="skincare">العناية بالبشرة (Skincare)</option>
+            <option value="makeup">المكياج (Makeup)</option>
+            <option value="hair">إكسسوارات الشعر (Hair Accessories)</option>
+            <option value="tools">أدوات التجميل (Beauty Tools)</option>
           </select>
         </div>
         <div class="form-group">
           <label>المقاسات (افصل بينها بفاصلة ,)</label>
-          <input type="text" id="p_sizes" placeholder="مثال: S, M, L, XL (اتركه فارغاً إذا كان مقاس واحد)">
+          <input type="text" id="p_sizes" placeholder="مثال: 50ml, 100ml (اتركه فارغاً ليظهر 'One Size' تلقائياً)">
         </div>
         <div class="form-group">
           <label>الألوان (أسماء بالإنجليزية، افصل بفاصلة ,)</label>
@@ -115,11 +115,7 @@
           <label>وصف المنتج (إنجليزي)</label>
           <textarea id="p_desc_en" rows="2" placeholder="Product description in English"></textarea>
         </div>
-        <div class="form-group">
-          <label>صور المنتج (يمكنك اختيار أكثر من صورة معاً)</label>
-          <input type="file" id="p_image" accept="image/*" multiple>
-          <div id="existing-images-container" style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;"></div>
-        </div>
+        <!-- خيار وضع الصور تمت إزالته بناءً على طلب المدير -->
         <button class="btn" onclick="addProduct()" id="add-btn">إضافة المنتج للموقع</button>
         <div id="msg"></div>
       </div>

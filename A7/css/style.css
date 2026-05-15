@@ -2,14 +2,15 @@
 :root {
   --bg-color: #050505;
   --text-color: #f4f4f4;
-  --accent-color: #ffffff;
-  --gray-color: #888888;
-  --card-bg: #111111;
-  --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --accent-color: #f4a4a4; /* Rose Gold */
+  --accent-glow: rgba(244, 164, 164, 0.2);
+  --gray-color: #a0a0a0;
+  --card-bg: #0f0f0f;
+  --transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   --font-main: 'Inter', 'Cairo', sans-serif;
   --font-head: 'Outfit', 'Cairo', sans-serif;
-  --glass: rgba(255, 255, 255, 0.03);
-  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass: rgba(255, 255, 255, 0.02);
+  --glass-border: rgba(255, 255, 255, 0.05);
 }
 
 * {
@@ -20,7 +21,7 @@
 
 body {
   font-family: var(--font-main);
-  background-color: var(--bg-color);
+  background-color: #050505; /* Deep base color */
   color: var(--text-color);
   line-height: 1.6;
   overflow-x: hidden;
@@ -171,8 +172,87 @@ nav {
 }
 
 .lang-btn-simple:hover {
-  background: white;
+  background: var(--accent-color);
   color: black;
+  border-color: var(--accent-color);
+}
+
+.bg-animation {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -100; /* Ensure it is behind everything */
+  overflow: hidden;
+  background: #050505;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.25;
+  animation: float 25s infinite ease-in-out alternate;
+}
+
+.orb-1 {
+  width: 600px;
+  height: 600px;
+  background: linear-gradient(45deg, var(--accent-color), #4a3b61);
+  top: -200px;
+  left: -150px;
+}
+
+.orb-2 {
+  width: 700px;
+  height: 700px;
+  background: linear-gradient(-45deg, #2d4a5e, #f4a4a4);
+  bottom: -250px;
+  right: -200px;
+  animation-delay: -5s;
+}
+
+.orb-3 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, #f4a4a4, transparent);
+  top: 30%;
+  left: 40%;
+  animation-duration: 40s;
+  opacity: 0.15;
+}
+
+/* Shimmer/Sparkle Effect */
+.sparkles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.sparkle {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  opacity: 0;
+  box-shadow: 0 0 10px white; /* Add glow to sparkles */
+  animation: twinkle var(--duration) infinite ease-in-out;
+  animation-delay: var(--delay);
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0; transform: scale(0); }
+  50% { opacity: 0.8; transform: scale(1); }
+}
+
+@keyframes float {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  33% { transform: translate(100px, 50px) rotate(10deg) scale(1.1); }
+  66% { transform: translate(-50px, 150px) rotate(-10deg) scale(0.9); }
+  100% { transform: translate(0, 0) rotate(0deg) scale(1); }
 }
 
 /* Catalog Profile Header */
@@ -184,14 +264,12 @@ nav {
   align-items: center;
   justify-content: center;
   text-align: center;
-  background: url('https://images.unsplash.com/photo-1523398363243-ce9bbbd06c95?q=80&w=1920&auto=format&fit=crop') center/cover no-repeat;
-  /* Fallback color if image is missing */
-  background-color: #111;
+  background: url('../img/beauty_model.png') center/cover no-repeat;
   padding: 0 10%;
   margin-top: 0;
   overflow: hidden;
-  opacity: 1; /* Override default section opacity */
-  transform: none; /* Override default section transform */
+  opacity: 1; 
+  transform: none;
 }
 
 .hero-overlay {
@@ -200,7 +278,8 @@ nav {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(5,5,5,1));
+  background: radial-gradient(circle at center, rgba(0,0,0,0.3) 0%, rgba(5,5,5,0.8) 100%);
+  pointer-events: none;
 }
 
 .hero-content {
@@ -208,6 +287,24 @@ nav {
   z-index: 2;
   max-width: 800px;
   animation: fadeInUp 1s ease-out;
+}
+
+.slogan-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120%;
+  height: 120%;
+  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+  z-index: -1;
+  filter: blur(50px);
+  animation: pulseGlow 4s infinite alternate;
+}
+
+@keyframes pulseGlow {
+  0% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.2); }
 }
 
 .hero-title {
@@ -238,7 +335,7 @@ nav {
 /* Brand Profile Compact */
 .brand-profile {
   padding: 3rem 10% 1rem;
-  background: var(--bg-color);
+  background: transparent;
 }
 
 .profile-compact {
@@ -414,12 +511,14 @@ nav {
 }
 
 .product-card {
-  background-color: var(--bg-color);
+  background-color: rgba(15, 15, 15, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-radius: 8px;
   overflow: hidden;
   position: relative;
   transition: var(--transition);
-  border: 1px solid #1a1a1a;
+  border: 1px solid var(--glass-border);
 }
 
 .product-card:hover {
@@ -625,7 +724,7 @@ nav {
 
 /* Contact Section */
 .contact {
-  background-color: #080808;
+  background-color: transparent;
   text-align: center;
 }
 

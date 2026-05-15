@@ -68,191 +68,9 @@ function logout() {
 
 let editModeId = null;
 let allProductsData = {};
-let currentEditImages = []; // URLs from server
-let pendingFiles = []; // local Files to upload
+// Image upload logic removed as per request
 
-// Listen to file input changes to append instead of replace
-document.addEventListener('DOMContentLoaded', () => {
-  const fileInput = document.getElementById('p_image');
-  if (fileInput) {
-    fileInput.addEventListener('change', (e) => {
-      for (let i = 0; i < e.target.files.length; i++) {
-        pendingFiles.push(e.target.files[i]);
-      }
-      fileInput.value = ''; // clear input so user can click again
-      renderExistingImages();
-    });
-  }
-});
-
-function renderExistingImages() {
-  const container = document.getElementById('existing-images-container');
-  container.innerHTML = '';
-  
-  // Combine server images and local pending files for display
-  const allDisplayImages = [
-    ...currentEditImages.map(url => ({ type: 'server', src: url, data: url })),
-    ...pendingFiles.map(file => ({ type: 'local', src: URL.createObjectURL(file), data: file }))
-  ];
-
-  allDisplayImages.forEach((imgObj, index) => {
-    const div = document.createElement('div');
-    div.style.position = 'relative';
-    div.style.width = '100px';
-    div.style.height = '120px';
-    div.style.border = index === 0 ? '3px solid #2ecc71' : '1px solid #ccc';
-    div.style.borderRadius = '5px';
-    div.style.padding = '5px';
-    div.style.display = 'flex';
-    div.style.flexDirection = 'column';
-    div.style.alignItems = 'center';
-    
-    const imgEl = document.createElement('img');
-    imgEl.src = imgObj.src;
-    imgEl.style.width = '100%';
-    imgEl.style.height = '70px';
-    imgEl.style.objectFit = 'cover';
-    imgEl.style.borderRadius = '3px';
-    
-    const label = document.createElement('span');
-    label.style.fontSize = '10px';
-    label.style.color = index === 0 ? '#2ecc71' : '#888';
-    label.style.fontWeight = index === 0 ? 'bold' : 'normal';
-    label.innerText = index === 0 ? 'الأساسية' : 'فرعية';
-    
-    const makeMainBtn = document.createElement('button');
-    makeMainBtn.innerText = 'جعلها الأساسية';
-    makeMainBtn.style.fontSize = '9px';
-    makeMainBtn.style.marginTop = '2px';
-    makeMainBtn.style.cursor = 'pointer';
-    makeMainBtn.onclick = (e) => {
-      e.preventDefault();
-      // Move this item to index 0
-      if (imgObj.type === 'server') {
-        const idx = currentEditImages.indexOf(imgObj.data);
-        currentEditImages.splice(idx, 1);
-        currentEditImages.unshift(imgObj.data);
-      } else {
-        const idx = pendingFiles.indexOf(imgObj.data);
-        pendingFiles.splice(idx, 1);
-        // to make it absolutely first, we need to move it to server images if there are any?
-        // Let's just swap it with index 0 of the combined array... Wait, it's easier to just manage one array.
-        // For simplicity, if they make a local file main, we put it at the start of pendingFiles,
-        // AND if there are server images, we must clear them or move them? 
-        // Best approach: If we just want to make it main, it must be the FIRST item overall.
-        // If it's local, we move it to start of pendingFiles, and we also move all currentEditImages AFTER pendingFiles?
-        // No, let's keep it simple: Just swap with index 0 of whichever array, but visual order might not match.
-        // Actually, let's just re-order the underlying arrays.
-      }
-      
-      // Let's simplify: 
-      // If we want to move an image to the absolute front:
-      if (index > 0) {
-        if (imgObj.type === 'server') {
-           const idx = currentEditImages.indexOf(imgObj.data);
-           currentEditImages.splice(idx, 1);
-           currentEditImages.unshift(imgObj.data);
-        } else {
-           const idx = pendingFiles.indexOf(imgObj.data);
-           pendingFiles.splice(idx, 1);
-           // We need it to be first overall. If currentEditImages has items, local file can't be first unless we change logic.
-           // Let's just put it at start of pendingFiles.
-           pendingFiles.unshift(imgObj.data);
-           // AND swap currentEditImages out? 
-           // Let's just warn:
-           alert('لجعل صورة جديدة هي الأساسية، يجب أن تحذف الصور القديمة أو سيتم رفعها كصورة ثانية.');
-        }
-      }
-      renderExistingImages();
-    };
-    
-    const delBtn = document.createElement('button');
-    delBtn.innerText = 'X';
-    delBtn.style.position = 'absolute';
-    delBtn.style.top = '-5px';
-    delBtn.style.right = '-5px';
-    delBtn.style.background = 'red';
-    delBtn.style.color = 'white';
-    delBtn.style.border = 'none';
-    delBtn.style.borderRadius = '50%';
-    delBtn.style.cursor = 'pointer';
-    delBtn.style.width = '20px';
-    delBtn.style.height = '20px';
-    delBtn.style.fontSize = '12px';
-    
-    delBtn.onclick = function(e) {
-      e.preventDefault();
-      if (imgObj.type === 'server') {
-        const idx = currentEditImages.indexOf(imgObj.data);
-        currentEditImages.splice(idx, 1);
-      } else {
-        const idx = pendingFiles.indexOf(imgObj.data);
-        pendingFiles.splice(idx, 1);
-      }
-      renderExistingImages();
-    };
-    
-    div.appendChild(imgEl);
-    div.appendChild(label);
-    if (index !== 0) div.appendChild(makeMainBtn);
-    div.appendChild(delBtn);
-    container.appendChild(div);
-  });
-}
-
-
-// Helper: Compress Image using Canvas
-async function compressImage(file, maxWidth = 1200, quality = 0.7) {
-  return new Promise((resolve, reject) => {
-    if (!file.type.startsWith('image/')) {
-        console.log("Not an image, skipping compression:", file.name);
-        return resolve(file);
-    }
-
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = (event) => {
-      const img = new Image();
-      img.src = event.target.result;
-      img.onload = () => {
-        try {
-          const canvas = document.createElement('canvas');
-          let width = img.width;
-          let height = img.height;
-
-          if (width > maxWidth) {
-            height = (maxWidth / width) * height;
-            width = maxWidth;
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-
-          canvas.toBlob((blob) => {
-            if (!blob) {
-                console.warn("Compression failed for:", file.name);
-                return resolve(file);
-            }
-            resolve(new File([blob], file.name, { type: 'image/jpeg' }));
-          }, 'image/jpeg', quality);
-        } catch (e) {
-          console.error("Canvas error:", e);
-          resolve(file);
-        }
-      };
-      img.onerror = (e) => {
-          console.error("Image load error:", e);
-          resolve(file);
-      };
-    };
-    reader.onerror = (e) => {
-        console.error("FileReader error:", e);
-        resolve(file);
-    };
-  });
-}
+// Image rendering and compression functions removed
 
 // Add or Update Product
 async function addProduct() {
@@ -266,8 +84,6 @@ async function addProduct() {
   const descEn = document.getElementById('p_desc_en').value.trim();
   const sizes = document.getElementById('p_sizes').value.trim();
   const colors = document.getElementById('p_colors').value.trim();
-  const fileInput = document.getElementById('p_image');
-
   if (!nameAr || !nameEn || !price) {
     msg.innerText = "الرجاء ملء الاسم والسعر.";
     msg.style.color = "#e74c3c";
@@ -279,44 +95,8 @@ async function addProduct() {
   msg.innerText = "";
 
   try {
-    let finalImages = [...currentEditImages];
+    let finalImages = editModeId ? allProductsData[editModeId].images : ["https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=600&text=Beauty"];
 
-    // Upload new images sequentially for stability with detailed logs
-    if (pendingFiles.length > 0) {
-      console.log("Starting upload for", pendingFiles.length, "files");
-      for (let i = 0; i < pendingFiles.length; i++) {
-        const file = pendingFiles[i];
-        try {
-          msg.innerText = `جاري معالجة الصورة (${i + 1} من ${pendingFiles.length})...`;
-          console.log(`Processing file ${i + 1}: ${file.name}`);
-          
-          // Compress (with safety)
-          let fileToUpload = file;
-          try {
-            fileToUpload = await compressImage(file);
-          } catch (compressErr) {
-            console.warn("Compression failed, using original file", compressErr);
-          }
-          
-          const uniqueName = Date.now() + '_' + Math.floor(Math.random() * 10000) + '_' + file.name;
-          const storageRef = storage.ref('products/' + uniqueName);
-          
-          console.log(`Uploading to: ${uniqueName}`);
-          const snapshot = await storageRef.put(fileToUpload);
-          const url = await snapshot.ref.getDownloadURL();
-          
-          console.log(`Upload success: ${url}`);
-          finalImages.push(url);
-        } catch (fileErr) {
-          console.error(`Error uploading file ${i + 1}:`, fileErr);
-          alert(`فشل رفع الصورة رقم ${i + 1}: ` + fileErr.message);
-        }
-      }
-    }
-    
-    if (finalImages.length === 0) {
-      finalImages.push("https://placehold.co/600x800/1a1a1a/555555?text=" + encodeURIComponent(nameEn));
-    }
 
     const sizesArr = sizes ? sizes.split(',').map(s => s.trim()).filter(s => s) : [];
     const colorsArr = colors ? colors.split(',').map(c => c.trim()).filter(c => c) : [];
@@ -394,8 +174,8 @@ function editProduct(id) {
   document.getElementById('p_sizes').value = p.sizes ? p.sizes.join(', ') : '';
   document.getElementById('p_colors').value = p.colors ? p.colors.join(', ') : '';
   
-  currentEditImages = p.images ? [...p.images] : [];
-  renderExistingImages();
+  // Image handling removed as per request
+
 
   // Show cancel button if not exists
   let cancelBtn = document.getElementById('cancel-edit-btn');
@@ -417,9 +197,7 @@ function editProduct(id) {
 // Cancel Edit Mode
 function cancelEdit() {
   editModeId = null;
-  currentEditImages = [];
-  pendingFiles = [];
-  renderExistingImages();
+  // Image handle reset removed
 
   document.getElementById('p_name_ar').value = '';
   document.getElementById('p_name_en').value = '';
@@ -430,7 +208,6 @@ function cancelEdit() {
   document.getElementById('p_desc_en').value = '';
   document.getElementById('p_sizes').value = '';
   document.getElementById('p_colors').value = '';
-  document.getElementById('p_image').value = '';
   
   addBtn.innerText = "إضافة المنتج للموقع";
   const cancelBtn = document.getElementById('cancel-edit-btn');
