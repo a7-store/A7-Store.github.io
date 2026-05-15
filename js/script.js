@@ -16,6 +16,11 @@ if (!firebase.apps.length) {
 }
 const db = firebase.firestore();
 
+// Enable offline caching for instant loads
+db.enablePersistence().catch(function(err) {
+  console.log("Firebase persistence error:", err);
+});
+
 let allProducts = [];
 let currentLang = 'ar';
 
@@ -214,29 +219,31 @@ function initSparkles() {
   }
 }
 
-async function fetchProducts() {
+function fetchProducts() {
   const grid = document.getElementById('collection-grid');
   const spinner = document.getElementById('loading-spinner');
   
-  try {
-    const snapshot = await db.collection('products').orderBy('createdAt', 'desc').get();
-    
+  db.collection('products').orderBy('createdAt', 'desc').onSnapshot(async (snapshot) => {
     // Auto-migrate default products if DB is empty
     if (snapshot.empty) {
-      await seedDefaultProducts();
-      return; // seedDefaultProducts will call fetchProducts again
+      if (allProducts.length === 0) {
+        await seedDefaultProducts();
+      }
+      return; 
     }
     
-    spinner.style.display = 'none';
+    if (spinner) spinner.style.display = 'none';
     allProducts = [];
-    grid.innerHTML = '';
     
+    let htmlString = '';
     snapshot.forEach(doc => {
       const p = doc.data();
       p.id = doc.id;
       allProducts.push(p);
-      renderProductCard(p, grid);
+      htmlString += renderProductCard(p, null);
     });
+    
+    if (grid) grid.innerHTML = htmlString;
     
     // Explicitly apply the current active category filter to newly added products
     const activeBtn = document.querySelector('.cat-btn.active');
@@ -256,10 +263,10 @@ async function fetchProducts() {
       collectionSection.classList.add('visible');
     }
     
-  } catch (error) {
+  }, (error) => {
     console.error("Error fetching products: ", error);
     if(spinner) spinner.innerHTML = "Error loading products.";
-  }
+  });
 }
 
 function renderProductCard(p, grid) {
@@ -301,7 +308,7 @@ function renderProductCard(p, grid) {
     <div class="product-card" data-category="${p.category}" style="position:relative;">
       ${discountBadge}
       <div class="product-img-wrapper" style="position:relative;">
-        <img src="${mainImage}" alt="${name}" class="product-img">
+        <img src="${mainImage}" alt="${name}" class="product-img" loading="lazy">
         ${countdownHTML}
       </div>
       <div class="product-info">
@@ -315,7 +322,10 @@ function renderProductCard(p, grid) {
     </div>
   `;
   
-  grid.insertAdjacentHTML('beforeend', cardHTML);
+  if (grid) {
+    grid.insertAdjacentHTML('beforeend', cardHTML);
+  }
+  return cardHTML;
 }
 
 function openDynamicModal(name, price, imagesStr, sizesStr, colorsStr) {
@@ -387,14 +397,16 @@ async function seedDefaultProducts() {
     { name_en: "Sonic Cleansing Brush", name_ar: "فرشاة تنظيف بالموجات الصوتية", price: 490, category: "tools", desc_en: "Vibrating brush for deep facial cleansing.", desc_ar: "فرشاة مهتزة لتنظيف الوجه بعمق.", images: ["https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&fit=crop"] }
   ];
   
+  const batch = db.batch();
   for (const p of beautyProducts) {
     p.createdAt = firebase.firestore.FieldValue.serverTimestamp();
     p.sizes = ["One Size"];
     p.colors = ["Rose Gold", "Silver", "Elegant Black"];
-    await db.collection('products').add(p);
+    const docRef = db.collection('products').doc();
+    batch.set(docRef, p);
   }
-  
-  fetchProducts(); // Reload after seeding
+  await batch.commit();
+  // onSnapshot will handle the UI update automatically
 }
 
 // Add this function to the global scope to allow users to reset their DB
