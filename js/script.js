@@ -1,6 +1,7 @@
 // js/script.js
 
 const firebaseConfig = {
+  // Version: 1.2 (Updated Limit)
   apiKey: "AIzaSyCWWHyRw7cdgoy2QSNPwItvs79wvMTn9lo",
   authDomain: "a7-store-fa7a4.firebaseapp.com",
   projectId: "a7-store-fa7a4",
@@ -223,7 +224,7 @@ function fetchProducts() {
   const grid = document.getElementById('collection-grid');
   const spinner = document.getElementById('loading-spinner');
   
-  db.collection('products').orderBy('createdAt', 'desc').limit(50).onSnapshot(async (snapshot) => {
+  db.collection('products').orderBy('createdAt', 'desc').limit(50).onSnapshot(async (snapshot) => { // Force Limit 50
     // Auto-migrate default products if DB is empty
     if (snapshot.empty) {
       if (allProducts.length === 0) {

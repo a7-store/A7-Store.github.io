@@ -1,4 +1,5 @@
 const firebaseConfig = {
+  // Version: 1.2 (Updated Limit)
   apiKey: "AIzaSyCWWHyRw7cdgoy2QSNPwItvs79wvMTn9lo",
   authDomain: "a7-store-fa7a4.firebaseapp.com",
   projectId: "a7-store-fa7a4",
@@ -225,7 +226,7 @@ function loadProducts() {
   loading.style.display = 'block';
   list.innerHTML = '';
 
-  db.collection('products').orderBy('createdAt', 'desc').limit(50).onSnapshot((snapshot) => {
+  db.collection('products').orderBy('createdAt', 'desc').limit(50).onSnapshot((snapshot) => { // Force Limit 50
     loading.style.display = 'none';
     list.innerHTML = '';
     count.innerText = snapshot.size;
