@@ -225,16 +225,28 @@ function loadProducts() {
   loading.style.display = 'block';
   list.innerHTML = '';
 
-  db.collection('products').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
+  db.collection('products').onSnapshot((snapshot) => {
     loading.style.display = 'none';
     list.innerHTML = '';
     count.innerText = snapshot.size;
     allProductsData = {}; // clear cache
 
+    let productsArray = [];
     snapshot.forEach((doc) => {
       const p = doc.data();
       allProductsData[doc.id] = p; // save for editing
+      productsArray.push({ id: doc.id, data: p });
+    });
 
+    // Sort locally to ensure products missing createdAt are not excluded
+    productsArray.sort((a, b) => {
+      const tA = a.data.createdAt && typeof a.data.createdAt.toMillis === 'function' ? a.data.createdAt.toMillis() : 0;
+      const tB = b.data.createdAt && typeof b.data.createdAt.toMillis === 'function' ? b.data.createdAt.toMillis() : 0;
+      return tB - tA;
+    });
+
+    productsArray.forEach((item) => {
+      const p = item.data;
       const div = document.createElement('div');
       div.className = 'product-item';
       div.innerHTML = `
@@ -246,8 +258,8 @@ function loadProducts() {
           </div>
         </div>
         <div class="product-actions" style="display:flex; gap:10px;">
-          <button class="btn" style="background:#3498db; color:white; width:auto; padding:8px 15px;" onclick="editProduct('${doc.id}')">تعديل</button>
-          <button class="btn btn-danger" onclick="deleteProduct('${doc.id}')">حذف</button>
+          <button class="btn" style="background:#3498db; color:white; width:auto; padding:8px 15px;" onclick="editProduct('${item.id}')">تعديل</button>
+          <button class="btn btn-danger" onclick="deleteProduct('${item.id}')">حذف</button>
         </div>
       `;
       list.appendChild(div);

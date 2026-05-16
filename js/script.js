@@ -223,7 +223,7 @@ function fetchProducts() {
   const grid = document.getElementById('collection-grid');
   const spinner = document.getElementById('loading-spinner');
   
-  db.collection('products').orderBy('createdAt', 'desc').onSnapshot(async (snapshot) => {
+  db.collection('products').orderBy('createdAt', 'desc').limit(50).onSnapshot(async (snapshot) => {
     // Auto-migrate default products if DB is empty
     if (snapshot.empty) {
       if (allProducts.length === 0) {
