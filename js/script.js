@@ -604,6 +604,8 @@ const translations = {
     lbl_hours: "Hours",
     lbl_mins: "Mins",
     lbl_secs: "Secs",
+    admin_panel: "Admin Panel",
+
 
     modal_qty: "Quantity:",
     feat_quality: "Premium Quality",
@@ -664,6 +666,8 @@ const translations = {
     lbl_hours: "ساعة",
     lbl_mins: "دقيقة",
     lbl_secs: "ثانية",
+    admin_panel: "لوحة التحكم",
+
 
     modal_qty: "الكمية:",
     feat_quality: "جودة ممتازة",
