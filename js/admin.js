@@ -225,7 +225,7 @@ function loadProducts() {
   loading.style.display = 'block';
   list.innerHTML = '';
 
-  db.collection('products').onSnapshot((snapshot) => {
+  db.collection('products').orderBy('createdAt', 'desc').limit(50).onSnapshot((snapshot) => {
     loading.style.display = 'none';
     list.innerHTML = '';
     count.innerText = snapshot.size;
@@ -236,13 +236,6 @@ function loadProducts() {
       const p = doc.data();
       allProductsData[doc.id] = p; // save for editing
       productsArray.push({ id: doc.id, data: p });
-    });
-
-    // Sort locally to ensure products missing createdAt are not excluded
-    productsArray.sort((a, b) => {
-      const tA = a.data.createdAt && typeof a.data.createdAt.toMillis === 'function' ? a.data.createdAt.toMillis() : 0;
-      const tB = b.data.createdAt && typeof b.data.createdAt.toMillis === 'function' ? b.data.createdAt.toMillis() : 0;
-      return tB - tA;
     });
 
     productsArray.forEach((item) => {
@@ -264,6 +257,11 @@ function loadProducts() {
       `;
       list.appendChild(div);
     });
+    
+    // Hide 'Load More' button if it exists from previous code
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    if (loadMoreBtn) loadMoreBtn.style.display = 'none';
+
   }, (error) => {
     console.error(error);
     loading.innerText = "خطأ في تحميل المنتجات: " + error.message;
