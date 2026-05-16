@@ -1,4 +1,5 @@
 const firebaseConfig = {
+  // Version: 1.2 (Updated Limit)
   apiKey: "AIzaSyCWWHyRw7cdgoy2QSNPwItvs79wvMTn9lo",
   authDomain: "a7-store-fa7a4.firebaseapp.com",
   projectId: "a7-store-fa7a4",
@@ -225,16 +226,21 @@ function loadProducts() {
   loading.style.display = 'block';
   list.innerHTML = '';
 
-  db.collection('products').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
+  db.collection('products').orderBy('createdAt', 'desc').limit(50).onSnapshot((snapshot) => { // Force Limit 50
     loading.style.display = 'none';
     list.innerHTML = '';
     count.innerText = snapshot.size;
     allProductsData = {}; // clear cache
 
+    let productsArray = [];
     snapshot.forEach((doc) => {
       const p = doc.data();
       allProductsData[doc.id] = p; // save for editing
+      productsArray.push({ id: doc.id, data: p });
+    });
 
+    productsArray.forEach((item) => {
+      const p = item.data;
       const div = document.createElement('div');
       div.className = 'product-item';
       div.innerHTML = `
@@ -246,12 +252,17 @@ function loadProducts() {
           </div>
         </div>
         <div class="product-actions" style="display:flex; gap:10px;">
-          <button class="btn" style="background:#3498db; color:white; width:auto; padding:8px 15px;" onclick="editProduct('${doc.id}')">تعديل</button>
-          <button class="btn btn-danger" onclick="deleteProduct('${doc.id}')">حذف</button>
+          <button class="btn" style="background:#3498db; color:white; width:auto; padding:8px 15px;" onclick="editProduct('${item.id}')">تعديل</button>
+          <button class="btn btn-danger" onclick="deleteProduct('${item.id}')">حذف</button>
         </div>
       `;
       list.appendChild(div);
     });
+    
+    // Hide 'Load More' button if it exists from previous code
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    if (loadMoreBtn) loadMoreBtn.style.display = 'none';
+
   }, (error) => {
     console.error(error);
     loading.innerText = "خطأ في تحميل المنتجات: " + error.message;
